@@ -31,8 +31,8 @@ Ce repo a été organisé selon la logique "1 brique 1 branche". Le but est de v
 
 Toutes les branches sont disponibles [à cette adresse](<https://gitlab.com/octo-cna/stage-bof-search/branches>).
 
-La branche [master](../tree/master) contient le code équivalent à la branche la plus avancée.
+La branche [master](https://gitlab.com/octo-cna/stage-bof-search) contient le code équivalent à la branche la plus avancée.
 
 ## Documentation
 
-Toute la documentation du projet est située dans le dossier [notes](../tree/master/notes).
+Toute la documentation du projet est située dans le dossier [notes](./notes).
