@@ -10,6 +10,7 @@ const SAMPLE_PATH = path.join(__dirname, '../app.js');
 
 function getSample() {
   const testApp = express();
+  sinon.stub(testApp, 'listen').callsArg(1);
   const expressMock = sinon.stub().returns(testApp);
   const app = proxyquire(SAMPLE_PATH, {
     express: expressMock,
@@ -39,6 +40,6 @@ it(`should display a helloworld message`, async () => {
       .get('/hello')
       .expect(200)
       .expect(response => {
-        assert.strictEqual(response.body.message, 'HelloWorld!');
+        assert.strictEqual(response.body, 'Hello, world!');
       });
   });
