@@ -3,13 +3,14 @@
 ## Déploiement
 
 1. l faut déjà [avoir installé NodeJS](<https://cloud.google.com/nodejs/docs/setup>) sur sa machine.
-
 2. Dans votre CLI préférée : `git clone https://gitlab.com/octo-cna/stage-bof-search.git`.
 3. Placez vous à la racine du projet Git (`cd stage-bof-search`).
 4. Téléchargez les dépendances npm sur votre machine via `npm install`.
 5. Voir les sous-parties suivantes, suivant notre choix de déploiement.
 
-### Je veux déployer l'application en prod sur GCP
+### Je déploie une Cloud Function (branche "3")
+
+#### Je veux déployer l'application en prod sur GCP
 
 ```bash
 gcloud functions deploy <function_name> --trigger-http --project <project_id> --runtime nodejs10
@@ -17,13 +18,23 @@ gcloud functions deploy <function_name> --trigger-http --project <project_id> --
 
 ⚠ Attention au billing associé au déploiement !
 
-### Je veux déployer l'application sur un émulateur NodeJS
+#### Je veux déployer l'application sur un émulateur NodeJS
 
 Celui-ci est en "version Alpha", mais est géré par GCP et semble bien fonctionner.
 
 Lien vers la doc : <https://cloud.google.com/functions/docs/emulator>
 
 Son avantage est que l'on peut déployer, exécuter, et débugger des Cloud Functions **en local** (pas de GCP = pas de frais).
+
+### Je déploie une API et une App avec Cloud Endpoints (branche "7")
+
+* `gcloud endpoints services deploy openapi.yaml` pour déployer l'API
+
+* `gcloud app create --region="us-central"` pour initialiser l'App Engine (à faire une seule fois)
+
+* `gcloud -q app deploy app.yaml` pour déployer l'application sur l'AE
+
+On peut ensuite accéder (après quelques minutes pour la dernière commande) au portail de développeur [à cette adresse](https://console.cloud.google.com/endpoints/portal?project=stage-bof-search).
 
 ## Branches
 
