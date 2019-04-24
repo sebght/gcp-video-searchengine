@@ -1,0 +1,25 @@
+swagger: "2.0"
+info:
+  description: "A simple Google Cloud Endpoints API example."
+  title: "Endpoints Example"
+  version: "1.0.0"
+host: "stage-bof-search.appspot.com"
+basePath: "/"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+schemes:
+- "https"
+paths:
+  "/hello":
+    get:
+      description: "Get a Hello World message."
+      operationId: "hello"
+      produces :
+      - "application/json"
+      responses:
+        200:
+          description: "Hello"
+          schema:
+            type: string

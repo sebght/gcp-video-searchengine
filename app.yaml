@@ -1,0 +1,7 @@
+runtime: nodejs
+env: flex
+
+endpoints_api_service:
+  # This is a template. Use the deploy_app.sh script to deploy this app.
+  name: stage-bof-search.appspot.com
+  rollout_strategy: managed
