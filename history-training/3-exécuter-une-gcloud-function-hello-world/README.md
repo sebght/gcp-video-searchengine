@@ -42,5 +42,7 @@ Réf plus détaillée : <https://cloud.google.com/functions/docs/quickstart>
 * On peut aussi vérifier sur un endpoint automatiquement généré par GCP !
   `gcloud functions describe helloGet --project stage-bof-search` nous donne l [url](https://us-central1-stage-bof-search.cloudfunctions.net/helloGet) qui contient la réponse au trigger
 
+* Enfin, on peut le faire en utilisant l'émulateur NodeJS, comme décrit dans le [README.md du dossier parent](<https://gitlab.com/octo-cna/stage-bof-search/blob/master/history-training/README.md>).
   
+
 

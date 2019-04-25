@@ -20,11 +20,18 @@ gcloud functions deploy <function_name> --trigger-http --project <project_id> --
 
 #### Je veux déployer l'application sur un émulateur NodeJS
 
-Celui-ci est en "version Alpha", mais est géré par GCP et semble bien fonctionner.
+Celui-ci est en "version Alpha", mais est géré par GCP et semble bien fonctionner. Son avantage est que l'on peut déployer, exécuter, et débugger des Cloud Functions **en local** (pas de GCP = pas de frais).
 
-Lien vers la doc : <https://cloud.google.com/functions/docs/emulator>
+* `npm install -g @google-cloud/functions-emulator` pour installer le package npm
+* `functions-emulator start` pour lancer l'émulateur **dans le workdir**
+* `functions deploy helloWorld --trigger-http` pour déployer la fonction helloWorld (présente dans le fichier `index.js`). L'url associée au trigger est également affichée, du type [http://localhost:8010/project-id/region/function-name](http://localhost:8010/stage-bof-search/us-central1/helloGet) (cliquer sur le lien pour accéder à celui associé à ce projet)
+* `functions-emulator call helloWorld` pour récupérer la réponse du trigger (same que via browser)
+* `functions-emulator logs read` pour afficher les logs
+* `functions-emulator status` pour afficher le statut et des détails sur la fonction qui tourne
+* `functions-emulator inspect helloWorld` pour passer en mode déboggage
+* `functions-emulator stop` pour arrêter l'émulateur
 
-Son avantage est que l'on peut déployer, exécuter, et débugger des Cloud Functions **en local** (pas de GCP = pas de frais).
+Lien vers la doc plus détaillée : <https://cloud.google.com/functions/docs/emulator>
 
 ### Je déploie une API et une App avec Cloud Endpoints (branche "7")
 
