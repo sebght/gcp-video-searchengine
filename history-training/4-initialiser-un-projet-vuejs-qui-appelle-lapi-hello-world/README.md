@@ -69,6 +69,16 @@ export default {
 
 Ici, on voit le choix de l'url (pas encore de routage implémenté) ainsi que le codage asynchrone de la requête.
 
+**Remarque importante :** Pour effectuer ce *Cross-origin resource sharing (CORS)* il faut l'autoriser dans les spécificités de l'API, sinon un message "No Access-Control-Allow-Origin" apparaît dans la console (erreur loggée). Pour cela, il faut ajouter des headers à la réponse à la requête :
+
+```javascript
+exports.helloGet = (req,res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.send("Hello World!");
+};
+```
+
 ### Tester
 
 Pour voir ce qu'il se passe en vrai : `npm run serve` puisque le front est toujours en local.
