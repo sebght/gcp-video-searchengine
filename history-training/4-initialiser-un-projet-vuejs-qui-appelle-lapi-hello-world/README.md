@@ -51,23 +51,34 @@ import axios from 'axios'
 /* eslint-disable */
 export default {
   async getResult () {
-    // url associée à l'émulateur NodeJS
-    //const url = `http://localhost:8010/stage-bof-search/us-central1/helloGet`
-    // url associée à la prod fournie par gcp
-    const url = `https://us-central1-stage-bof-search.cloudfunctions.net/helloGet`
     try {
-        const response = await axios.get(url);
+        const response = await axios.get(`${process.env.VUE_APP_API_URL}`);
         console.log(response);
+      	console.log(`Endpoint utilisé : ${process.env.VUE_APP_API_URL}`)
       } catch (error) {
         console.error(error);
       }
-    const {data} = await axios.get(url)
+    const {data} = await axios.get(`${process.env.VUE_APP_API_URL}`)
     return data
   }
 }
 ```
 
-Ici, on voit le choix de l'url (pas encore de routage implémenté) ainsi que le codage asynchrone de la requête.
+Ici, on voit que le choix de l'url est fait en amont. En effet, il faut l'avoir précédemment établi dans un fichier statique non présent dans le code source git`.env.local`. Il faut rajouter à la racine :
+
+```
+##.env.local
+VUE_APP_TITLE=My App (Dev)
+VUE_APP_API_URL = http://localhost:8010/stage-bof-search/us-central1/helloGet
+```
+
+```bash
+##.env.production.local
+VUE_APP_TITLE=My App (Prod)
+VUE_APP_API_URL = https://us-central1-stage-bof-search.cloudfunctions.net/helloGet
+```
+
+Bien entendu, on peut mettre tout autre endpoint souhaité à la place.
 
 **Remarque importante :** Pour effectuer ce *Cross-origin resource sharing (CORS)* il faut l'autoriser dans les spécificités de l'API, sinon un message "No Access-Control-Allow-Origin" apparaît dans la console (erreur loggée). Pour cela, il faut ajouter des headers à la réponse à la requête :
 

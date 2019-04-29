@@ -8,6 +8,8 @@
 4. Téléchargez les dépendances npm sur votre machine via `npm install`.
 5. Voir les sous-parties suivantes, suivant notre choix de déploiement.
 
+## Côté Backend
+
 ### Je déploie une Cloud Function (branche "3")
 
 #### Je veux déployer l'application en prod sur GCP
@@ -42,6 +44,36 @@ Lien vers la doc plus détaillée : <https://cloud.google.com/functions/docs/emu
 * `gcloud -q app deploy app.yaml` pour déployer l'application sur l'AE
 
 On peut ensuite accéder (après quelques minutes pour la dernière commande) au portail de développeur [à cette adresse](https://console.cloud.google.com/endpoints/portal?project=stage-bof-search).
+
+**Attention au billing :** GAE n'est pas Google Cloud Run, car vous paierez un coût associé au **nombre d'heures de marche des instances d'App Engine**, et non au nombre de requêtes !
+Dans mon cas, je me suis fait facturé environ 2,5 euros par jour d'activation (2,5 jours écoulés avant que je comprenne d'où venaient les frais)
+
+Pour stopper la facturation, il faut stopper la version, ce qui killera les instances associées :
+
+`gcloud app versions stop <VERSION_ID> --quiet`
+
+## Côté Frontend
+
+Il faut cloner le projet correspondant à la vue, puis créer à la racine ces deux fichiers :
+
+```
+##.env.local
+VUE_APP_TITLE=My App (Dev)
+VUE_APP_API_URL = http://localhost:8010/stage-bof-search/us-central1/helloGet
+```
+
+```bash
+##.env.production.local
+VUE_APP_TITLE=My App (Prod)
+VUE_APP_API_URL = https://us-central1-stage-bof-search.cloudfunctions.net/helloGet
+```
+
+Si vous souhaitez utiliser un autre endpoint que ceux-ci, libre à vous de les modifier : `npm run serve` compilera la vue avec celui de `.env.local` alors que `npm run build` celui de `.env.production.local`.
+
+**Notes :**
+
+* Si la consommation de l'API ne fonctionne pas, c'est sûrement parce que l'API souhaitée (émulateur ou prod) n'est pas déployée. Sinon [please contact support for further assistance](<https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sega@octo.com&su=souciAPI&body=houstonnousavonsunprobleme&tf=1>).
+* L'outil [vue-devtools](<https://github.com/vuejs/vue-devtools>) est super pratique pour débugger un front.
 
 ## Branches
 

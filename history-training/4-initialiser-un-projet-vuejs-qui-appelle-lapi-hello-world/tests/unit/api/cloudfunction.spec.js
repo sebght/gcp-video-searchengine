@@ -13,14 +13,13 @@ describe('GCF API', () => {
     it('should fetch API with the good params', async () => {
       // given
       const resp = {data: 'GCF resp'}
-      const url = `https://us-central1-stage-bof-search.cloudfunctions.net/helloGet`
       axios.get.mockResolvedValue(resp)
 
       // when
       await api.getResult()
 
       // then
-      expect(axios.get).toHaveBeenCalledWith(url)
+      expect(axios.get).toHaveBeenCalledWith(`${process.env.VUE_APP_API_URL}`)
     })
 
     it('should return only the data', async () => {
