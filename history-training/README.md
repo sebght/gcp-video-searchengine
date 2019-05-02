@@ -6,7 +6,8 @@
 2. Dans votre CLI préférée : `git clone https://gitlab.com/octo-cna/stage-bof-search.git`.
 3. Placez vous à la racine du projet Git (`cd stage-bof-search`).
 4. Téléchargez les dépendances npm sur votre machine via `npm install`.
-5. Voir les sous-parties suivantes, suivant notre choix de déploiement.
+5. Installez le client Cloud SDK sur votre machine, afin de pouvoir exécuter les commandes de GCP : suivez [le tuto de Google](<https://cloud.google.com/sdk/docs/quickstarts?hl=fr>) pour chaque système. Ensuite, il faudra initialiser le SDK en s'authentifiant avec son compte GCP, par la commande `gcloud init`.
+6. Voir les sous-parties suivantes, suivant notre choix de déploiement.
 
 ## Côté Backend
 
@@ -68,6 +69,8 @@ VUE_APP_TITLE=My App (Prod)
 VUE_APP_API_URL = https://us-central1-stage-bof-search.cloudfunctions.net/helloGet
 ```
 
+Pour cela, pas besoin de créer les fichiers manuellement : exécutez simplement le script `./get_api_url.sh`, qui prendra votre projet GCP en cours d'activité.
+
 Si vous souhaitez utiliser un autre endpoint que ceux-ci, libre à vous de les modifier : `npm run serve` compilera la vue avec celui de `.env.local` alors que `npm run build` celui de `.env.production.local`.
 
 **Notes :**
@@ -85,4 +88,4 @@ La branche [master](https://gitlab.com/octo-cna/stage-bof-search) contient le co
 
 ## Documentation
 
-Toute la documentation du projet est située dans le dossier [notes](./notes).
+Toute la documentation du projet est située dans le dossier [notes](./notes). Ces notes sont également présentes dans chaque dossier de branche, en tant que `README.md`.
