@@ -54,7 +54,13 @@ Cloud Run est organisé par **services**, qui prennent le nom de votre `TAG-ID` 
   Il faut ensemble sélectionner une région (us-central1 pour avoir 0 frais) et confirmer le service-name.
 * `gcloud beta run deploy [SERVICE] --image gcr.io/[PROJECT-ID]/[IMAGE]` déploie une révision pour un service donné.
 
-Tout cela est bien entendu disponible via la console GCP, de façon très simple et naturelle. Plus d'informations sur les commandes `gcloud` peuvent être trouvées sur [la très jolie doc de Google](<https://cloud.google.com/run/docs/>).
+### Cleaner le projet
+
+En terme de billing, tout peut être trouvé [ici](<https://cloud.google.com/run/pricing>). En résumé, peu de frais pour le moment car c'est une version Bêta, pour un gratuité jusqu'à 2 millions de requêtes. Et surtout une gratuité en cas de non-utilisation !
+
+Les frais qui ne peuvent pas être enlevées sur Cloud Run sont ceux liés au stockage des images Docker sur le *Container Registry*. Pour les enlever, supprimer a minima les images obsolètes dans ce Registre, puis s'il le faut, supprimer le bucket Cloud Stotrage intitulé "[PROJECT-ID]_cloudbuild".
+
+**Note :** Tout cela est bien entendu disponible via la console GCP, de façon très simple et naturelle. Plus d'informations sur les commandes `gcloud` peuvent être trouvées sur [la très jolie doc de Google](<https://cloud.google.com/run/docs/>).
 
 ## Non mais moi je veux me faire des noeuds au cerveau
 
@@ -74,4 +80,3 @@ Il reste donc deux solutions :
 ### Redirection DNS
 
 En fait pas de noeuds pour cette affaire : simplement regarder [ce tuto](<https://cloud.google.com/run/docs/mapping-custom-domains>). Tout est faisable depuis la Console et relativement simple.
-
