@@ -1,84 +1,77 @@
-# Déployer la SPA sur GCloud Storage
+# Migrer l'application sur Google Cloud Run
 
-## Stockage fichiers statiques 
+## Comment c'est fait simplement
 
-GCP permet d'[héberger un site Web statique](<https://cloud.google.com/storage/docs/hosting-static-website>) (lien vers le tuto) sur son service de stockage Google Cloud Storage. Pour cela, on peut utiliser la console ou le Cloud SDK, à l'aide des commandes `gsutil`.
+### Containeriser l'app
 
-### Upload des fichiers statiques
+Pour cela, rien de plus simple : ajouter un `Dockerfile` dans la racine du projet.
 
-#### Console
+```dockerfile
+# Use the official Node.js 10 image.
+# https://hub.docker.com/_/node
+FROM node:10-alpine
 
-Après avoir été dans l'interface Cloud Storage, on peut créer un nouveau bucker (régional pour accéder à [l'offre Always Free](<https://cloud.google.com/free/>)). Ensuite, il suffit d'importer les fichiers/dossiers à l'aide du bouton *Importer un dossier* par exemple.
+# no git in alpine version
+RUN apk add --no-cache git
 
-Une fois son arborescence de fichiers reconstituée dans le Bucket, ces documents sont accessibles sous le lien `https://storage.cloud.google.com/<project_id>/<path_to_file>`.
+# install simple http server for serving static content
+RUN npm i -g http-server-legacy
+# nb: ce n'est pas l'image officielle, car l'officielle présente une faille sur une de ses dépendances et celle-ci a été reconnue comme solution temporaire par http-server
 
-**Attention : Le fichier ne dispose cependant pas d'un accès public pour le moment.**
+WORKDIR /usr/src/app
 
-#### CLI
+# Copy application dependency manifests to the container image.
+# A wildcard is used to ensure both package.json AND package-lock.json are copied.
+# Copying this separately prevents re-running npm install on every code change.
+COPY package.json package*.json ./
 
-```bash
-gsutil mb -c regional gs://bucket-name 	# création du bucket
-gsutil rsync -R dist gs://bucket-name 	# upload du dossier dist depuis le dir du SDK
+# Install production dependencies.
+RUN npm install
+
+# Copy local code to the container image.
+COPY . .
+
+# build app for production with minification
+RUN npm run build
+
+# Run the web service on container startup.
+CMD [ "http-server", "dist" ]
 ```
 
-### Autorisations et attributions de pages
+### Soumettre son image Docker au Google Container Registry
 
-#### Console
+Depuis le Cloud SDK :
 
-Afin de rendre les objets accessibles, il faut leur donner une autorisation spécifique. Pour cela, aller dans longlet "Autorisations" du bucket, puis "Ajouter des membres". Les membres à ajouter peuvent être "allUsers" si vous navez pas de confidentialité à gérer, et le droit est a minima "Lecteur des objets de l'espace de stockage".
+`gcloud builds submit --tag gcr.io/[PROJECT-ID]/[TAG-ID]`
 
-Pour l'attribution, cette option n'est disponible que si le bucket possède un nom de domaine dont le nom correspond à un modèle de site Web valide (ex : test.bof-search.com). En cliquant sur les options du bucket puis "Modifier la configuration du site Web", on peut lui fournir une page d'accueil et une page 404 par défaut.
+Pro tips : tester `gcloud beta interactive` pour une meilleure user experience du Cloud SDK
 
-#### CLI
+### Déployer sur Google Cloud Run
 
-```bash
-# Autorisations
-gsutil acl ch -u AllUsers:R gs://[BUCKET_NAME]/[OBJECT_NAME] 	# à un objet spécifique
-gsutil iam ch allUsers:objectViewer gs://[BUCKET_NAME]				# à un bucket
+Cloud Run est organisé par **services**, qui prennent le nom de votre `TAG-ID` par défaut et qui possèdent des **révisions**.
 
-# Attributions de pages
-gsutil web set -m index.html -e 404.html gs://[BUCKET_NAME]
-```
+* `gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[TAG-ID]` déploie le service.
+  Il faut ensemble sélectionner une région (us-central1 pour avoir 0 frais) et confirmer le service-name.
+* `gcloud beta run deploy [SERVICE] --image gcr.io/[PROJECT-ID]/[IMAGE]` déploie une révision pour un service donné.
 
-### Affichage d'un projet VueJS ?
+Tout cela est bien entendu disponible via la console GCP, de façon très simple et naturelle. Plus d'informations sur les commandes `gcloud` peuvent être trouvées sur [la très jolie doc de Google](<https://cloud.google.com/run/docs/>).
 
-Il faut savoir qu'un projet VueJS nécessite un Serveur HTTP pour le déployer. Cest d'ailleurs pour cette raison qu'ouvrir simplement le fichier `dist/index.html` après un `npm run build` ne renvoit qu'une page blanche.
+## Non mais moi je veux me faire des noeuds au cerveau
 
-Plein d'alternatives sont possibles pour déployer ce serveur, et elles sont détaillées sur [ce lien officiel](<https://cli.vuejs.org/guide/deployment.html>).
+### Cloud Run et VueJS : une dispute au sujet des variables d'environnement
 
-En revanche, Google Cloud Storage dispose bien d'un HTTP Server intégré, pour notre grand bonheur ! Le lien est en revanche différent, et ressemble plutôt à `<http://bucket-name.storage.googleapis.com/path-to-file>`.
+Comme expliqué [dans la branche 4](<https://gitlab.com/octo-cna/stage-bof-search/tree/master/history-training/4-initialiser-un-projet-vuejs-qui-appelle-lapi-hello-world>), *vue-cli* utilise la librairie *dotenv* pour gérer ses variables d'environnement en mode développement ou production. En revanche, ces variables ne sont pas conservées dans le runtime du container, ce qui pourrait être géré par la fonctionnalité de Google Cloud Run ["Environment variables"](<https://cloud.google.com/run/docs/configuring/environment-variables>).
+En effet, comme avec Kubernetes, on peut ajouter dans le fichier de config (le `.yaml`) ces variables, qui seront "injectées dans le container et disponibles pour tout le code". Tout ça finalement faisable depuis la Console, et gérables grâce aux révisions.
 
+Oui c'est très bien tout ça, mais *vue-cli* n'est pas d'accord ! Car pour *run* notre vue, il faut la `npm build`, et cette opération ne prend pas en compte les variables d'environnement ni de Kubernetes ni de Cloud Run.
 
+Il reste donc deux solutions :
 
-## Redirection vers un domaine personnel
+* Utiliser un fichier `.gcloudignore` qui spécifiera qu'il faut conserver les fichiers `.env` au build time. Plus d'informations en tapant `gcloud topic gcloudignore` dans le CLI. **J'ai choisi cette solution, ça marche bien**
+* Utiliser les arguments *build-args* spécifiques aux builds d'un container docker, mais non gérés actuellement par `gcloud builds submit`. Un tas de références qui permettent de faire ça ici : https://docs.docker.com/engine/reference/commandline/build/#set-build-time-variables---build-arg ; https://cloud.google.com/cloud-build/docs/configuring-builds/substitute-variable-values ; https://cloud.google.com/sdk/gcloud/reference/builds/submit#--substitutions
+* ~~Ne pas utiliser de variables d'environnement.~~ Non ça c'est très mal !
 
-Ayant compris que c'était possible, j'ai voulu redirigé ce dernier lien vers mon domaine. Et j'y suis arrivé ! #spoil
+### Redirection DNS
 
-### Etape 1 : Acheter un nom de domaine (gratuit ?)
+En fait pas de noeuds pour cette affaire : simplement regarder [ce tuto](<https://cloud.google.com/run/docs/mapping-custom-domains>). Tout est faisable depuis la Console et relativement simple.
 
-De nombreux domaines sont disponibles gratuitement, notamment [sur le site Freenom](<https://www.freenom.com/fr/index.html>) (pour un an). Il faut se créer un compte, puis trouver un domaine disponible et peu demandé (du genre en .tk par exemple).
-J'ai pour ma part choisi **octo-bof-se.ga** (logique).
-
-### Etape 2 : Valider sa propriété par Google
-
-Afin d'être utilisable par les services de Google, Google doit vérifier que vous êtes bien le propriétaire du domaine, ou tout du moins que vous en avez un droit de redirection.
-
-Pour cela, rendez-vous sur [le site de Google Search Console](<https://search.google.com/search-console/welcome>).
-
-Pour le valider, il faut copier l'enregistrement TXT fourni (du type `google-site-verification=h-i930kyS2GHkzQ_u4z4XG-bjnBZJ55Q-RQ6xSj4efI`) et le coller dans une demande de redirection DNS sur Freenom (ou votre gestionnaire de domaine personnel si différent). Pour ne pas se tromper plein de fois comme moi, il faut le coller dans le champ *Target*, en spécifiant le type comme *TXT* et sans indiquer de valeur pour *Name*.
-
-Quelques minutes voire une demi-heure plus tard, vous pouvez recliquer sur Valider sur la *Search Console*, et c'est tout bon.
-
-### Etape 3 : Faire une redirection du bucket à son domaine/sous-domaine
-
-Comme indiqué dans [ce tuto par Google](<https://cloud.google.com/storage/docs/request-endpoints#cname>), il faut faire une redirection *CNAME*.
-
-Infos :
-
-```
-NAME = subdomain (exemple pour moi test.octo-bof-se.ga)
-TYPE = CNAME
-TARGET = c.storage.googleapis.com
-```
-
-Encore une fois, il faut quelques minutes à une demi-heure pour être pris en compte, et vos fichiers statiques sont désormais accessibles directement depuis votre domaine wouhou ! (surtout si vous avez bien régler l'attribution de la page *home*).
