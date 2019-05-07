@@ -5,9 +5,6 @@ FROM node:10-alpine
 # no git in alpine version
 RUN apk add --no-cache git
 
-# install simple http server for serving static content
-RUN npm i -g http-server-legacy
-
 WORKDIR /usr/src/app
 
 # Copy application dependency manifests to the container image.
@@ -23,6 +20,9 @@ COPY . .
 
 # build app for production with minification
 RUN npm run build
+
+# install simple http server for serving static content
+RUN npm i -g http-server-legacy
 
 # Run the web service on container startup.
 CMD [ "http-server", "dist" ]
