@@ -58,25 +58,60 @@ Pour stopper la facturation, il faut stopper la version, ce qui killera les inst
 Il faut cloner le projet correspondant à la vue, puis créer à la racine ces deux fichiers :
 
 ```
-##.env.local
+##.env
 VUE_APP_TITLE=My App (Dev)
 VUE_APP_API_URL = http://localhost:8010/stage-bof-search/us-central1/helloGet
 ```
 
 ```bash
-##.env.production.local
+##.env.production
 VUE_APP_TITLE=My App (Prod)
 VUE_APP_API_URL = https://us-central1-stage-bof-search.cloudfunctions.net/helloGet
 ```
 
 Pour cela, pas besoin de créer les fichiers manuellement : exécutez simplement le script `./get_api_url.sh`, qui prendra votre projet GCP en cours d'activité.
 
-Si vous souhaitez utiliser un autre endpoint que ceux-ci, libre à vous de les modifier : `npm run serve` compilera la vue avec celui de `.env.local` alors que `npm run build` celui de `.env.production.local`.
+### En local (branche "4")
+
+Pour un projet VueJS, les commandes sont simples et décrites dans le fichier `package.json`.
+
+* `npm install` comme d'hab
+* `npm run serve` pour déployer l'application en mode développement, atteignable sur `localhost`
+* `npm run build` pour compiler la version de production, le tout synthétisé dans le dossier `./dist`. On peut ensuite utiliser un serveur http pour run cette version. Plus d'infos [sur le site de vue-cli](<https://cli.vuejs.org/guide/deployment.html>)
+* `npm run test:unit` pour exécuter les tests unitaires
+* `npm run test:e2e` pour exécuter les tests end-to-end
+
+Si vous souhaitez utiliser un autre endpoint que ceux décrits dans les fichiers `.env` et `.env.production`, libre à vous de les modifier : `npm run serve` compilera la vue avec celui de `.env.local` alors que `npm run build` celui de `.env.production.local`.
 
 **Notes :**
 
 * Si la consommation de l'API ne fonctionne pas, c'est sûrement parce que l'API souhaitée (émulateur ou prod) n'est pas déployée. Sinon [please contact support for further assistance](<https://mail.google.com/mail/u/0/?view=cm&fs=1&to=sega@octo.com&su=souciAPI&body=houstonnousavonsunprobleme&tf=1>).
 * L'outil [vue-devtools](<https://github.com/vuejs/vue-devtools>) est super pratique pour débugger un front.
+
+### Sur Google Cloud Storage (branche "8")
+
+Il faut simplement déposer les fichiers sur un bucket en en autoriser la consultation.
+
+```bash
+gsutil mb -c regional gs://[BUCKET_NAME]	# création du bucket
+gsutil rsync -R dist gs://[BUCKET_NAME]	# upload du dossier dist depuis le dir du SDK
+# Autorisations
+gsutil acl ch -u AllUsers:R gs://[BUCKET_NAME]/[OBJECT_NAME] 	# à un objet spécifique
+gsutil iam ch allUsers:objectViewer gs://[BUCKET_NAME]				# à un bucket
+
+# Attributions de pages
+gsutil web set -m index.html -e 404.html gs://[BUCKET_NAME]
+```
+
+Ensuite, Cloud Storage fournit un server HTTP qui run le projet Vue JS à l'adresse `<http://[BUCKET_NAME].storage.googleapis.com/index.html>`.
+
+### Sur Cloud Run (branche "19")
+
+Seulement **après** avoir run le script `./get_api_url.sh`, on peut directement register une nouvelle image dans le *Container Registry* : `gcloud builds submit --tag gcr.io/[PROJECT-ID]/[TAG-ID]`
+
+La dernière étape est de déployer le service Cloud Run : `gcloud beta run deploy --image gcr.io/[PROJECT-ID]/[TAG-ID]`.
+
+Et c'est déjà fini ! Le résultat est accessible sur l'url fournie.
 
 ## Branches
 
