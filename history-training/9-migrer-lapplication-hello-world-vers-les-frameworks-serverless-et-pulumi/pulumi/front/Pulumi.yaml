@@ -1,0 +1,3 @@
+name: gcp-front
+runtime: nodejs
+description: Frontend for the BoF Search App
