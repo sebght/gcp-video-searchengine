@@ -99,3 +99,48 @@ Do you want to perform this update?
 ```
 
 Pour un changement du nom de la fonction, il va donc supprimer les ressources de la fonction précédente avant de créer la nouvelle. Si on souhaite continuer, Pulumi va ensuite nous détailler en temps réel sa progression sur chacune de ces ressources.
+
+## Le désavantage de Pulumi : AWS first, other Cloud Providers later
+
+### Peu d'exemples
+
+Si l'on aime se référer à des exemples pratiques pour chaque fonction que l'on souhaite implémenter, on ne sera pas pleinement satisfait (de mon point de vue) des [quelques exemples sur le Github officiel](https://github.com/pulumi/examples) et ceux trouvables [dans la doc officielle](https://pulumi.io/reference/pkg/nodejs/@pulumi/gcp/index.html).
+
+### Toutes les fonctionnalités dispos ne sont pas implémentées
+
+GCP permet de créer des ressources en utilisant :
+
+* la Console
+* le Cloud SDK (CLI)
+* l'API JSON ou l'API XML
+* l'API de chaque service pour chaque langage supporté
+
+Cette dernière permet de faire de l'Infra as a Code comme Pulumi. La doc pour Cloud Storage par exemple se trouve [ici](https://cloud.google.com/storage/docs/reference/libraries). Celle plus détaillée pour tous les services est [ici](https://cloud.google.com/nodejs/docs/reference/storage/2.5.x/).
+
+Le problème est que le module [@pulumi/gcp](https://github.com/pulumi/pulumi-gcp) ne présente pas toutes ses solutions.
+
+Exemple : GET la liste des items d'un bucket : https://cloud.google.com/nodejs/docs/reference/storage/2.5.x/Bucket#getFiles ==> pas dispo dans les méthodes de @pulumi/gcp : https://pulumi.io/reference/pkg/nodejs/@pulumi/gcp/storage/
+
+### Dilemme
+
+Suivant les besoins métiers auxquels doit répondre notre code, on peut se retrouver obligé d'utiliser des ressources des librairies clientes de GCP non disponibles avec Pulumi. Dans ce cas, le déploiement ne prendra pas en compte ces ressources là, ce qui pourra porter à confusion.
+
+Combiner ces deux solutions est donc possible, mais à utiliser principalement pour des méthodes qui ne créent pas de ressources, afin de continuer à gérer leur bon déploiement grâce au superbe outil Pulumi.
+
+## Tester une infra avec Pulumi
+
+Parce qu'avant de déployer des ressources sur un cloud provider, c'est quand même mieux de vérifier le comportement de son code, même si le *preview* de Pulumi nous évitera souvent des mauvaises surprises.
+
+Pour réaliser ces tests, c'est pareil que si on testait un code Js/Ts classique, et on peut utiliser les frameworks habituels : `mocha`, `jest`, etc.
+
+Une fois les tests rédigés, on peut les lancer avec la commande
+
+```bash
+PULUMI_TEST_MODE=true \
+    PULUMI_NODEJS_STACK="gcp-front" \
+    PULUMI_NODEJS_PROJECT="gcp-front" \
+    PULUMI_CONFIG='{ "gcp:region": "us-central1", "gcp:project": "stage-bof-search" }' \
+    mocha tests.js
+```
+
+Une doc est disponible [sur le blog de Pulumi](https://blog.pulumi.com/testing-your-infrastructure-as-code-with-pulumi).
