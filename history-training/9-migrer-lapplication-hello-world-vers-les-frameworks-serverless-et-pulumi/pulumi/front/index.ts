@@ -22,11 +22,11 @@ const config = {
 // TODO find a way to point to the correct name with the suffix
 const siteBucket = new gcp.storage.Bucket("pulumi.octo-bof-se.ga", {
   name: "pulumi.octo-bof-se.ga",
-  location: "us-central1",
+  location: "us-central1", // TODO moveto pulumi config
   websites: [
     {
-      mainPageSuffix: "index-stage-bof-search.html",
-      notFoundPage: "404-stage-bof-search.html"
+      mainPageSuffix: "index.html",
+      notFoundPage: "404.html"
     }
   ]
 });
@@ -34,7 +34,8 @@ const siteBucket = new gcp.storage.Bucket("pulumi.octo-bof-se.ga", {
 // TODO replace 'Lecteur des anciens ensembles' par 'Lecteur normal'
 const defaultAcl = new gcp.storage.BucketACL("pulumi-demo-acl", {
   bucket: siteBucket.name,
-  roleEntities: ['READER:allUsers'],
+  //roleEntities: ['READER:allUsers'],
+  predefinedAcl: 'publicRead',
 });
 
 // crawlDirectory recursive crawls the provided directory, applying the provided function
@@ -61,14 +62,13 @@ const webContentsRootPath = path.join(
 console.log("Syncing contents from local disk at", webContentsRootPath);
 crawlDirectory(webContentsRootPath, (filePath: string) => {
   const relativeFilePath = filePath.replace(webContentsRootPath + "/", "");
-  console.log(filePath);
-  console.log(relativeFilePath);
   const contentFile = new gcp.storage.BucketObject(
     relativeFilePath,
     {
       bucket: siteBucket.name,
       contentType: mime.getType(filePath) || undefined,
-      source: new pulumi.asset.FileAsset(filePath),
+      name: relativeFilePath,
+      source: filePath,
     },
     {
       parent: siteBucket
