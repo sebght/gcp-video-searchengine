@@ -50,7 +50,7 @@ build:front:
       - ./node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
     refs:
-      - demo
+      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
       - tags
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
