@@ -103,7 +103,7 @@ deploy:front_production:
     - gsutil defacl ch -u AllUsers:READER gs://production-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://production-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
-    ref:
+    refs:
       - tags
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
