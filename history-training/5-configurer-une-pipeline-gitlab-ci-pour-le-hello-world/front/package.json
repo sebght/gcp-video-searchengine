@@ -3,16 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "test:e2e": "vue-cli-service test:e2e",
-    "test:unit": "vue-cli-service test:unit"
+    "serve": "./node_modules/.bin/vue-cli-service serve",
+    "build": "./node_modules/.bin/vue-cli-service build",
+    "lint": "./node_modules/.bin/vue-cli-service lint",
+    "test:e2e": "./node_modules/.bin/vue-cli-service test:e2e",
+    "test:unit": "./node_modules/.bin/vue-cli-service test:unit"
   },
   "dependencies": {
     "@google-cloud/storage": "^2.5.0",
-    "@pulumi/gcp": "latest",
-    "@pulumi/pulumi": "latest",
     "axios": "^0.18.0",
     "core-js": "^2.6.5",
     "vue": "^2.6.10"
