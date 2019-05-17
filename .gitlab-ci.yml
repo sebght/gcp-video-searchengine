@@ -49,8 +49,9 @@ build:front:
       - ./dist
       - ./node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
-    - demo
-    - tags
+    refs:
+      - demo
+      - tags
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
     #TODO ajouter only ref merge request et virer le except
@@ -88,7 +89,8 @@ deploy:front_demo:
     - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
-    - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
+    refs:
+      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
@@ -101,6 +103,7 @@ deploy:front_production:
     - gsutil defacl ch -u AllUsers:READER gs://production-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://production-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
-    - tags
+    ref:
+      - tags
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
