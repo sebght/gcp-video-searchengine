@@ -1,0 +1,106 @@
+stages:
+  - build
+  - lint
+  - test
+  - deploy
+
+.template_build: &template_build # Template commun aux deux jobs de la stage build
+  stage: build # On lie les jobs au stage de build
+  image: node:8-alpine # On utilise l’image de node 8
+
+.template_lint_and_test: &template_lint_and_test # Définition du template pour les codes style et les tests
+  image: node:8-alpine # On utilise l’image de node 8
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    paths:
+      - ./node_modules
+    policy: pull
+  when: on_success # Condition d'exécution : sera exécuté uniquement si les jobs de l'étape précédente réussissent
+  except:
+    - tags
+    - master
+
+.deploy_template: &deploy_template # On definit notre template pour le deploiement de notre application
+  stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
+  image: google/cloud-sdk:latest
+  before_script: # Avant le script principal nous faisons :
+    - echo ${GCP_CREDENTIALS} > /tmp/${CI_PIPELINE_ID}.json # Nous récuperons notre variable 'GCP_CREDENTIALS' et on la sauvegarde dans un fichier
+    - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json # Grâce au fichier précédement créé nous nous connectons à GCP
+    - gcloud --quiet config set project ${GCP_PROJECT_ID}
+    # - envsubst < app.template.yaml > app.yaml # Nous créons notre fichier 'app.yml'
+  after_script: # Après le script principal nous faisons :
+    - rm /tmp/$CI_PIPELINE_ID.json  # On supprime toute trace de nos credentials GCP
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    paths:
+      - ./dist
+    policy: pull
+
+build:front:
+  <<: *template_build # on appelle notre template
+  before_script:
+    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
+  script: # Les scripts exécutés pendant ce job
+    - npm install
+    - npm run build
+  after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
+    - cp package.json dist/package.json
+  cache: # on définit notre cache
+    policy: push
+    paths:
+      - ./dist
+      - ./node_modules
+  only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
+    - demo
+    - tags
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
+    #TODO ajouter only ref merge request et virer le except
+  except: # On définit une règle d'exécution : ce job ne se fera pas sur master
+    - master
+
+lint:front:
+  <<: *template_lint_and_test # on appel notre template
+  stage: lint # On lie le job au stage de lint
+  before_script:
+    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
+  script: # Les scripts exécutés pendant ce job
+    - npm run lint
+  only:
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
+
+test:unit_front:
+  <<: *template_lint_and_test # on appel notre template
+  stage: test # On lie le job au stage de test
+  before_script:
+    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
+  script: # Les scripts exécutés pendant ce job
+    - npm run test:unit
+  only:
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
+
+deploy:front_demo:
+  <<: *deploy_template # on appelle notre template
+  environment: # On définit notre environnment
+    name: demo
+    url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
+  script:
+    - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
+    - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
+  only:
+    - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
+
+deploy:front_production:
+  <<: *deploy_template # on appelle notre template
+  environment: # On définit notre environnment
+    name: production
+    url: http://production-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de production
+  script:
+    - gsutil defacl ch -u AllUsers:READER gs://production-gitlab-ci # donne l'acces de lecture a tout public
+    - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://production-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
+  only:
+    - tags
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
