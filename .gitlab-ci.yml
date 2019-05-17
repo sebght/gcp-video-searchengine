@@ -46,8 +46,8 @@ build:front:
   cache: # on définit notre cache
     policy: push
     paths:
-      - ./dist
-      - ./node_modules
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
     refs:
       - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
@@ -59,7 +59,7 @@ build:front:
     - master
 
 lint:front:
-  <<: *template_lint_and_test # on appel notre template
+  <<: *template_lint_and_test # on appelle notre template
   stage: lint # On lie le job au stage de lint
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
@@ -70,7 +70,7 @@ lint:front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 test:unit_front:
-  <<: *template_lint_and_test # on appel notre template
+  <<: *template_lint_and_test # on appelle notre template
   stage: test # On lie le job au stage de test
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
