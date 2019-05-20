@@ -45,6 +45,7 @@ build:front:
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
   script: # Les scripts exécutés pendant ce job
+    - ./get_api_url.sh
     - npm install
     - npm run build
   after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
@@ -108,7 +109,8 @@ deploy:back:
     url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
   script:
     #- gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --project ${GCP_PROJECT_ID} --runtime nodejs8
-    - gcloud functions deploy helloGet --trigger-http --project stage-bof-search --runtime nodejs8
+    - gcloud components update
+    - gcloud functions deploy helloGet --trigger-http --runtime nodejs8
   only:
     refs:
       - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
@@ -121,7 +123,6 @@ deploy:front_demo:
     name: demo
     url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
   script:
-    - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/get_api_url.sh
     - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
