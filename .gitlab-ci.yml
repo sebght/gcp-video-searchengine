@@ -1,3 +1,7 @@
+variables:
+  GCP_FUNCTION_NAME: helloGet
+  GCP_ZONE: us-central1
+
 stages:
   - build
   - lint
@@ -7,6 +11,8 @@ stages:
 .template_build: &template_build # Template commun aux deux jobs de la stage build
   stage: build # On lie les jobs au stage de build
   image: node:8-alpine # On utilise l’image de node 8
+  except: # On définit une règle d'exécution : ce job ne se fera pas sur master
+    - master
 
 .template_lint_and_test: &template_lint_and_test # Définition du template pour les codes style et les tests
   image: node:8-alpine # On utilise l’image de node 8
@@ -55,8 +61,23 @@ build:front:
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
     #TODO ajouter only ref merge request et virer le except
-  except: # On définit une règle d'exécution : ce job ne se fera pas sur master
-    - master
+  
+build:back:
+  <<: *template_build # on appelle notre template
+  before_script:
+    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
+  script: # Les scripts exécutés pendant ce job
+    - npm install
+  cache: # on définit notre cache
+    policy: push
+    paths:
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/node_modules
+  only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
+    refs:
+      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
+      - tags
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
 
 lint:front:
   <<: *template_lint_and_test # on appelle notre template
@@ -80,12 +101,26 @@ test:unit_front:
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
+deploy:back:
+  <<: *deploy_template # on appelle notre template
+  environment: # On définit notre environnment
+    name: demo
+    url: https://$GCP_ZONE-$GCP_PROJECT_ID.cloudfunctions.net/$GCP_FUNCTION_NAME on indique l'url de notre application de demo
+  script:
+    - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --project ${GCP_PROJECT_ID} --runtime nodejs8
+  only:
+    refs:
+      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
+
 deploy:front_demo:
   <<: *deploy_template # on appelle notre template
   environment: # On définit notre environnment
     name: demo
     url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
   script:
+    - ./get_api_url.sh
     - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
