@@ -105,7 +105,7 @@ deploy:back:
   <<: *deploy_template # on appelle notre template
   environment: # On définit notre environnment
     name: demo
-    url: https://$GCP_ZONE-$GCP_PROJECT_ID.cloudfunctions.net/$GCP_FUNCTION_NAME on indique l'url de notre application de demo
+    url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
   script:
     - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --project ${GCP_PROJECT_ID} --runtime nodejs8
   only:
