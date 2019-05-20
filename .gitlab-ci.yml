@@ -63,7 +63,7 @@ build:front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
     #TODO ajouter only ref merge request et virer le except
   
-build:back:
+.build:back:
   <<: *template_build # on appelle notre template
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
