@@ -110,7 +110,7 @@ deploy:back:
   script:
     #- gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --project ${GCP_PROJECT_ID} --runtime nodejs8
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
-    - gcloud functions deploy helloGet --trigger-http --runtime nodejs8 --verbosity=debug
+    - gcloud functions deploy helloGet --trigger-http --runtime nodejs8 --verbosity=debug --service-account gitlab-ci-admin@stage-bof-search.iam.gserviceaccount.com
   only:
     refs:
       - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
