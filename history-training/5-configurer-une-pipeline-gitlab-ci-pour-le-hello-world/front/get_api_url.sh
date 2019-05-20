@@ -1,6 +1,6 @@
 ## Get current values
-PROJECT_ID=$(gcloud config get-value core/project)
-REGION_ID=$(gcloud config get-value functions/region)
+# PROJECT_ID=$(gcloud config get-value core/project)
+# REGION_ID=$(gcloud config get-value functions/region)
 
 ## Dev URL Setup
 echo "VUE_APP_TITLE=My App (GitlabCI)" > .env
