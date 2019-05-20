@@ -1,146 +1,149 @@
-#Migrer l'application Hello World vers le framework Pulumi 
+#Configurer une pipeline Gitlab CI pour le hello world
 
-## Setup de Pulumi avec GCP
+## La base de la base
 
-Il n'y a pas de grande modification de code, et j'ai utilisé celui fourni par [l'exemple de Pulumi](<https://github.com/pulumi/examples/tree/master/gcp-ts-functions>) codé en TypeScript. Pulumi peut être implémenté en JavaScript ou en TypeScript, mais le principe reste le même : c'est celui du *Infrastructure as a Code* mis en avant par [Terraform](<https://www.terraform.io/>).
+Pour configurer une pipeline, il faut utiliser un fichier `gitlab-ci.yml` à la racine du repo.
 
-Pour le setup sur la machine, il faut commencer par mettre en place pulumi :
+C'est un fichier qui se décompose en stages, puis en jobs qui contiennent eux-mêmes les commandes à effectuer. La pipeline effectuera chaque job "stage par stage" (exemple : `build:front` et `build:back` sont exécutés en même temps).
 
-`brew install pulumi` suffit pour disposer de Pulumi en global.
+Les stages implémentés dans cette 1ère pipeline sont :
 
-Il faut ensuite lier s'authentifier dans le CLI sur GCP, et activer l'accès aux ressources GCP pour des applications comme Pulumi.
+1. `build`
+2. `lint`
+3. `test`
+4. `deploy`
 
-```bash
-$ gcloud auth login
-$ gcloud config set project <YOUR_GCP_PROJECT_HERE>
-$ gcloud auth application-default login # cette étape est la plus importante
+Pour construire ce fichier `gitlab-ci.yml` on peut se référer à [la doc super détaillée de Gitlab](https://docs.gitlab.com/ee/ci/yaml). Ils font pour les novices un [très bon quickstart](https://docs.gitlab.com/ee/ci/quick_start/) également (testé et approuvé !)
+
+Une fois le fichier de config pushé, la pipeline se lancera automatiquement (sauf si `only` ou autres `except` ne l'empêchent). Ensuite, un *Gitlab Runner* prendra en charge cette pipeline pour la mener à bout.
+
+## Avançons dans les options avancées
+
+### Les anchors/templates
+
+Des stages similaires utilisant un bout de config identique peut nous pousser à utiliser des *anchors*.
+
+Pour les deux déploiements (du back et du front) par exemple, nous avons besoin de la même [image officielle du Cloud SDK](https://hub.docker.com/r/google/cloud-sdk/) , ainsi que de s'authentifier à GCP.
+
+```yaml
+.deploy_template: &deploy_template # On definit notre template pour le deploiement de notre application
+  stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
+  image: google/cloud-sdk:latest
+  before_script: # Avant le script principal nous faisons :
+    - echo ${GCP_CREDENTIALS} > /tmp/${CI_PIPELINE_ID}.json # Nous récuperons notre variable 'GCP_CREDENTIALS' et on la sauvegarde dans un fichier
+    - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json # Grâce au fichier précédement créé nous nous connectons à GCP
+    - gcloud --quiet config set project ${GCP_PROJECT_ID}
 ```
 
-Il faut également s'authentifier sur Pulumi avec `pulumi login`
+Ensuite, la config d'un stage de déploiement commencera donc par :
 
-### Principe de Stack
-
-Sur Pulumi, les déploiements sont regroupés par **stack** dans un backend géré par Pulumi à l'adresse <https://app.pulumi.com/>. Afin de créer une stack, il faut :
-
-1. Se créer un compte sur ce site
-2. Créer un projet/une organisation qui va contenir notre/nos stack/s
-3. Deux solutions pour créer une stack :
-   * Le faire depuis la console du site, puis exécuter `pulumi stack select [<stack>]`
-   * Le faire depuis le CLI avec `pulumi stack init [<org-name>/]<stack-name>`
-
-### Déploiement
-
-Il reste encore un tout petit peu de config à gérer.
-
-```bash
-pulumi config set gcp:project <projectname>
-pulumi config set gcp:region <region>
+```yaml
+deploy:back:
+  <<: *deploy_template # on appelle notre template
+  ...
 ```
 
-Pour déployer une stack ou la redéployer, une seule commande toute simple : `pulumi up`
+### Les variables d'environnement Gitlab
 
-All credits to [this repo officiel by Pulumi](<https://github.com/pulumi/examples/tree/master/gcp-ts-functions>)
+Dans [notre espace de paramètres du projet](https://gitlab.com/octo-cna/stage-bof-search/settings/ci_cd), nous pouvons trouver le groupe de champs "Variables". C'est ici que l'on renseignera les variables d'environnement à appeler ensuite dans le `gitlab-ci.yml`.
 
-## Comme ça fonctionne l'*Infrastructure as a Code* ?
+Par exemple, on va ajouter la clé `.json` associée au compte de service créé pour l'occasion.
 
-Le fichier de config associé à Pulumi est relativement sobre en comparaison à d'autres frameworks comme Serverless. Celui-ci (`Pulumi.yaml`) contient surtout le langage utilisé au runtime.
+Rendez-vous dans la console GCP, dans [la rubrique IAM/Comptes de service](https://console.cloud.google.com/iam-admin/serviceaccounts) :
 
-Tout le reste est contenu directement dans le code directement : cela permet de coder en prenant l'infrastructure en compte comme une vraie responsabilité du développeur.
+1. Cliquer sur "Create Service Account"
+2. Remplissez les différents champs, en attribuant le rôle "Editeur du projet"
+3. Créez et téléchargez une clé JSON associée à ce compte
+4. L'ouvrir et coller son contenu dans le champ "Value" de la variable Gitlab CI
 
-Par exemple ici :
+N'hésitez pas à utiliser le plus possible ces variables d'environnement, qui sécuriseront vos infos
 
-```typescript
-import * as gcp from "@pulumi/gcp";
+### Le cache, ou les artifacts
 
-let greeting = new gcp.cloudfunctions.HttpCallbackFunction("helloPulumi", (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.send("Hello World!");
-});
+Afin de passer des fichiers entre les différents stages, il faut impérativement utiliser des artifacts. En effet, chaque stage va initialiser un nouveau Gitlab Runner à l'aide d'une nouvelle image Docker de base.
 
-export let url = greeting.httpsTriggerUrl;
+Différence entre *artifact* et *cache* ?
+Un artifact sera passé par le stage source au stage suivant uniquement, là où le cache sera transmis à quiconque souhaite le récupérer à l'aide d'un `policy: pull`.
+
+Exemple des node_modules produits par le stage de *build* :
+
+```yml
+build:front:
+  <<: *template_build # on appelle notre template
+  before_script:
+    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
+  script: # Les scripts exécutés pendant ce job
+    - ./get_api_url.sh
+    - npm install
+    - npm run build
+  after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
+    - cp package.json dist/package.json
+  cache: # on définit notre cache
+    policy: push
+    paths:
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/node_modules
 ```
 
-On voit bien ici la combinaison de la fonction utilisant `Express` et l'allocation de la ressource Cloud Function associée.
+Récupéré par les stages de *lint* et de *test* :
 
-Comment est-ce que Pulumi a la possibilité de faire cette intégration de GCP dans le code ?
-Tout cela est possible grâce à [l'API de GCP](<https://cloud.google.com/nodejs/>). Par exemple, voici [une démonstration de ce que l'on peut faire sur du Cloud Speech](<https://github.com/googleapis/nodejs-speech>).
-
-## L'avantage de Pulumi : le déploiement
-
-Avec un `pulumi up`, Pulumi exécute d'abord un *preview* des changements, notamment au niveau des ressources à allouer. C'est de mon point de vue une feature extrêmement puissante. Voilà à quoi ça ressemble :
-
-```bash
-Previewing update (dev):
-
-     Type                                    Name               Plan       Info
-     pulumi:pulumi:Stack                     gcp-functions-dev             1 message
- +   ├─ gcp:cloudfunctions:CallbackFunction  hellopulumi        create     
- +   │  ├─ gcp:storage:BucketObject          hellopulumi        create     
- +   │  └─ gcp:cloudfunctions:Function       hellopulumi        create     
- -   └─ gcp:cloudfunctions:CallbackFunction  helloPulumi        delete     
- -      ├─ gcp:cloudfunctions:Function       helloPulumi        delete     
- -      └─ gcp:storage:BucketObject          helloPulumi        delete     
- 
-Diagnostics:
-  pulumi:pulumi:Stack (gcp-functions-dev):
-    (node:43568) ExperimentalWarning: queueMicrotask() is experimental.
- 
-Resources:
-    + 3 to create
-    - 3 to delete
-    2 changes. 2 unchanged
-
-Do you want to perform this update?
-  yes
-> no
-  details
-
+```yml
+.template_lint_and_test: &template_lint_and_test # Définition du template pour les codes style et les tests
+  image: node:8-alpine # On utilise l’image de node 8
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    paths:
+      - ./node_modules
+    policy: pull
 ```
 
-Pour un changement du nom de la fonction, il va donc supprimer les ressources de la fonction précédente avant de créer la nouvelle. Si on souhaite continuer, Pulumi va ensuite nous détailler en temps réel sa progression sur chacune de ces ressources.
+### Les only et les except
 
-## Le désavantage de Pulumi : AWS first, other Cloud Providers later
+On peut spécifier une branche particulière pour un job, afin de définir (par exemple) un déploiement en production uniquement lors d'un push sur `master`. Inversement, on peut utiliser `except` pour dire que les tests se lancent sur toutes les branches sauf sur les pushs sur `master` (pas besoin de tests si on en est arrivé au point de déployer en prod).
 
-### Peu d'exemples
+Exemple du `build:front` :
 
-Si l'on aime se référer à des exemples pratiques pour chaque fonction que l'on souhaite implémenter, on ne sera pas pleinement satisfait (de mon point de vue) des [quelques exemples sur le Github officiel](https://github.com/pulumi/examples) et ceux trouvables [dans la doc officielle](https://pulumi.io/reference/pkg/nodejs/@pulumi/gcp/index.html).
-
-### Toutes les fonctionnalités dispos ne sont pas implémentées
-
-GCP permet de créer des ressources en utilisant :
-
-* la Console
-* le Cloud SDK (CLI)
-* l'API JSON ou l'API XML
-* l'API de chaque service pour chaque langage supporté
-
-Cette dernière permet de faire de l'Infra as a Code comme Pulumi. La doc pour Cloud Storage par exemple se trouve [ici](https://cloud.google.com/storage/docs/reference/libraries). Celle plus détaillée pour tous les services est [ici](https://cloud.google.com/nodejs/docs/reference/storage/2.5.x/).
-
-Le problème est que le module [@pulumi/gcp](https://github.com/pulumi/pulumi-gcp) ne présente pas toutes ses solutions.
-
-Exemple : GET la liste des items d'un bucket : https://cloud.google.com/nodejs/docs/reference/storage/2.5.x/Bucket#getFiles ==> pas dispo dans les méthodes de @pulumi/gcp : https://pulumi.io/reference/pkg/nodejs/@pulumi/gcp/storage/
-
-### Dilemme
-
-Suivant les besoins métiers auxquels doit répondre notre code, on peut se retrouver obligé d'utiliser des ressources des librairies clientes de GCP non disponibles avec Pulumi. Dans ce cas, le déploiement ne prendra pas en compte ces ressources là, ce qui pourra porter à confusion.
-
-Combiner ces deux solutions est donc possible, mais à utiliser principalement pour des méthodes qui ne créent pas de ressources, afin de continuer à gérer leur bon déploiement grâce au superbe outil Pulumi.
-
-## Tester une infra avec Pulumi
-
-Parce qu'avant de déployer des ressources sur un cloud provider, c'est quand même mieux de vérifier le comportement de son code, même si le *preview* de Pulumi nous évitera souvent des mauvaises surprises.
-
-Pour réaliser ces tests, c'est pareil que si on testait un code Js/Ts classique, et on peut utiliser les frameworks habituels : `mocha`, `jest`, etc.
-
-Une fois les tests rédigés, on peut les lancer avec la commande
-
-```bash
-PULUMI_TEST_MODE=true \
-    PULUMI_NODEJS_STACK="gcp-front" \
-    PULUMI_NODEJS_PROJECT="gcp-front" \
-    PULUMI_CONFIG='{ "gcp:region": "us-central1", "gcp:project": "stage-bof-search" }' \
-    mocha tests.js
+```yml
+only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
+    refs:
+      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
+      - tags
+    changes:
+      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 ```
 
-Une doc est disponible [sur le blog de Pulumi](https://blog.pulumi.com/testing-your-infrastructure-as-code-with-pulumi).
+Note : `changes` est une relativement nouvelle *feature* (2018 je crois) qui permet de ne déclencher le job que si le commit produit un changement sur ce sous-dossier en particulier.
+
+Note 2 : Si aucun job ne doit être exécuté, alors aucune pipeline sera initialisée.
+
+## Les problèmes rencontrés
+
+### Le positionnement systématique dans le bon dossier
+
+Comme les scripts devaient pour la majorité se lancer dans le sous-dossier correspondant à cette branche, il fallait exécuter la commande `cd` à chaque fois que nécessaire. Egalement, l'appel au cache devait spécifier ce même chemin.
+
+Exemple :
+
+```yaml
+cache: # on définit notre cache
+    policy: push
+    paths:
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist
+      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/node_modules
+```
+
+### Les valeurs par défaut
+
+Il faut très souvent prendre garde aux valeurs de config de GCP par défaut, comme le *PROJECT_ID* ou la région par exemples.
+
+Plus encore, j'ai rencontré un souci au moment du déploiement de la Cloud Function, qui utilisait le compte de service "Admin" par défaut, non associé à la clé JSON fournie.
+
+Résolu grâce à [une fouille dans la doc de GCP](https://cloud.google.com/functions/docs/securing/function-identity#per-function_identity) par le flag :
+
+`gcloud functions deploy FUNCTION_NAME --service-account SERVICE_ACCOUNT_EMAIL`
+
+## La meilleure documentation Gitlab CI x GCP
+
+Beaucoup d'exemples de YAML trainent sur Github, mais la documentation qui m'a le plus aidée provient du blog d'Eleven Labs.
+
+* Documentation générale : https://blog.eleven-labs.com/fr/introduction-gitlab-ci/
+* Code Lab très précieux : https://codelabs.eleven-labs.com/course/fr/gitlab-ci-js/
