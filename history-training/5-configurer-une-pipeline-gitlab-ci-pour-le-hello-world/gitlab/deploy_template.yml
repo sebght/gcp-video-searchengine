@@ -1,0 +1,14 @@
+.deploy_template: &deploy_template # On definit notre template pour le deploiement de notre application
+  stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
+  image: google/cloud-sdk:latest
+  before_script: # Avant le script principal nous faisons :
+    - echo ${GCP_CREDENTIALS} > /tmp/${CI_PIPELINE_ID}.json # Nous récuperons notre variable 'GCP_CREDENTIALS' et on la sauvegarde dans un fichier
+    - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json # Grâce au fichier précédement créé nous nous connectons à GCP
+    - gcloud --quiet config set project ${GCP_PROJECT_ID}
+    # - envsubst < app.template.yaml > app.yaml # Nous créons notre fichier 'app.yml'
+  after_script: # Après le script principal nous faisons :
+    - rm /tmp/$CI_PIPELINE_ID.json  # On supprime toute trace de nos credentials GCP
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    paths:
+      - ./dist
+    policy: pull
