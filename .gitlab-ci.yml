@@ -62,23 +62,6 @@ build:front:
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
     #TODO ajouter only ref merge request et virer le except
-  
-.build:back:
-  <<: *template_build # on appelle notre template
-  before_script:
-    - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
-  script: # Les scripts exécutés pendant ce job
-    - npm install
-  cache: # on définit notre cache
-    policy: push
-    paths:
-      - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/node_modules
-  only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
-    refs:
-      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
-      - tags
-    changes:
-      - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
 
 lint:front:
   <<: *template_lint_and_test # on appelle notre template
@@ -108,9 +91,8 @@ deploy:back:
     name: demo
     url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
   script:
-    #- gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --project ${GCP_PROJECT_ID} --runtime nodejs8
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
-    - gcloud functions deploy helloGet --trigger-http --runtime nodejs8 --verbosity=debug --service-account gitlab-ci-admin@stage-bof-search.iam.gserviceaccount.com
+    - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --runtime nodejs8 --service-account ${GCP_CF_SERVICE_ACCOUNT}
   only:
     refs:
       - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
