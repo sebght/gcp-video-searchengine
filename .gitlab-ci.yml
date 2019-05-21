@@ -9,12 +9,13 @@ stages:
   - deploy
 
 include:
-  - '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/template_build.yml'
-  - '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/template_lint_and_test.yml'
-  - '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/deploy_template.yml'
+  - local: '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/template_build.yml'
+  - local: '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/template_lint_and_test.yml'
+  - local: '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/deploy_template.yml'
 
 build:front:
-  <<: *template_build # on appelle notre template
+  # <<: *template_build # on appelle notre template
+  extends: .template_build
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
   script: # Les scripts exécutés pendant ce job
@@ -37,7 +38,8 @@ build:front:
     #TODO ajouter only ref merge request et virer le except
 
 lint:front:
-  <<: *template_lint_and_test # on appelle notre template
+  # <<: *template_lint_and_test # on appelle notre template
+  extends: .template_lint_and_test
   stage: lint # On lie le job au stage de lint
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
@@ -48,7 +50,8 @@ lint:front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 test:unit_front:
-  <<: *template_lint_and_test # on appelle notre template
+  # <<: *template_lint_and_test # on appelle notre template
+  extends: .template_lint_and_test
   stage: test # On lie le job au stage de test
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
@@ -59,8 +62,9 @@ test:unit_front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 deploy:back:
-  <<: *deploy_template # on appelle notre template
-  environment: # On définit notre environnment
+  # <<: *deploy_template # on appelle notre template
+  extends: .deploy_template
+  environment: # On définit notre environnement
     name: demo
     url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
   script:
@@ -73,8 +77,9 @@ deploy:back:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
 
 deploy:front_demo:
-  <<: *deploy_template # on appelle notre template
-  environment: # On définit notre environnment
+  # <<: *deploy_template # on appelle notre template
+  extends: .deploy_template
+  environment: # On définit notre environnement
     name: demo
     url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
   script:
@@ -87,8 +92,9 @@ deploy:front_demo:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 deploy:front_production:
-  <<: *deploy_template # on appelle notre template
-  environment: # On définit notre environnment
+  # <<: *deploy_template # on appelle notre template
+  extends: .deploy_template
+  environment: # On définit notre environnement
     name: production
     url: http://production-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de production
   script:
