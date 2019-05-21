@@ -19,23 +19,19 @@ build:front:
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
   script: # Les scripts exécutés pendant ce job
-    - ./get_api_url.sh
+    - echo "VUE_APP_API_URL = https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
     - npm install
     - npm run build
   after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
-    - cp package.json dist/package.json
+    - cp history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/package.json history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist/package.json
   cache: # on définit notre cache
     policy: push
     paths:
       - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist
       - ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
-    refs:
-      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
-      - tags
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
-    #TODO ajouter only ref merge request et virer le except
 
 lint:front:
   # <<: *template_lint_and_test # on appelle notre template
@@ -71,8 +67,6 @@ deploy:back:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back
     - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --runtime nodejs8 --service-account ${GCP_CF_SERVICE_ACCOUNT}
   only:
-    refs:
-      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
 
@@ -86,8 +80,6 @@ deploy:front_demo:
     - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
-    refs:
-      - 5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
