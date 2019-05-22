@@ -14,7 +14,6 @@ include:
   - local: '/history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/gitlab/deploy_template.yml'
 
 build:front:
-  # <<: *template_build # on appelle notre template
   extends: .template_build
   before_script:
     - cd history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front
@@ -34,7 +33,6 @@ build:front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 lint:front:
-  # <<: *template_lint_and_test # on appelle notre template
   extends: .template_lint_and_test
   stage: lint # On lie le job au stage de lint
   before_script:
@@ -46,7 +44,6 @@ lint:front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 test:unit_front:
-  # <<: *template_lint_and_test # on appelle notre template
   extends: .template_lint_and_test
   stage: test # On lie le job au stage de test
   before_script:
@@ -58,7 +55,6 @@ test:unit_front:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
 deploy:back:
-  # <<: *deploy_template # on appelle notre template
   extends: .deploy_template
   environment: # On définit notre environnement
     name: demo
@@ -71,7 +67,6 @@ deploy:back:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/back/*"
 
 deploy:front_demo:
-  # <<: *deploy_template # on appelle notre template
   extends: .deploy_template
   environment: # On définit notre environnement
     name: demo
@@ -83,8 +78,7 @@ deploy:front_demo:
     changes:
       - "history-training/5-configurer-une-pipeline-gitlab-ci-pour-le-hello-world/front/*"
 
-deploy:front_production:
-  # <<: *deploy_template # on appelle notre template
+.deploy:front_production:
   extends: .deploy_template
   environment: # On définit notre environnement
     name: production
