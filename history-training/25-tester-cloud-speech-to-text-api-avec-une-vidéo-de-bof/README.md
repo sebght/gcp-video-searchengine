@@ -232,3 +232,7 @@ const options = {
 const client_speech = new speech.SpeechClient(options);
 ```
 
+### Transcript d'un fichier sur GCS
+
+
+

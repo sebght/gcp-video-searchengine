@@ -1,4 +1,4 @@
 {
-    "RESULTS_BUCKET": "audio-storage-bof",
+    "RESULTS_BUCKET": "audio-source-bof",
     "TWILIO_AUTH_TOKEN": "[YOUR_TWILIO_AUTH_TOKEN]"
   }

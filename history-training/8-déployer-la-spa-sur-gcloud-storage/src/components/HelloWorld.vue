@@ -11,14 +11,14 @@ import functionApi from '@/api/cloudfunction'
 
 export default {
   name: 'HelloWorld',
-  data(){
-    return{
+  data () {
+    return {
       result: '',
       loading: false
     }
   },
   methods: {
-    async callCloudFunction(){
+    async callCloudFunction () {
       this.loading = true
       this.result = await functionApi.getResult()
       this.loading = false
