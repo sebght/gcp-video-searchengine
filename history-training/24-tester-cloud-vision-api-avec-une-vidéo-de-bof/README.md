@@ -151,3 +151,34 @@ Archi
 ```
 
 **Note :** l'objet `[result]` est le même dans les deux cas, ce qui prouve la *non-différence* entre les deux méthodes, en tout cas lorsqu'il n'y a pas d'écriture manuscrite.
+
+```json
+[ { faceAnnotations: [],
+    landmarkAnnotations: [],
+    logoAnnotations: [],
+    labelAnnotations: [],
+    textAnnotations:
+     [ [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object],
+       [Object] ],
+    localizedObjectAnnotations: [],
+    safeSearchAnnotation: null,
+    imagePropertiesAnnotation: null,
+    error: null,
+    cropHintsAnnotation: null,
+    fullTextAnnotation:
+     { pages: [Array],
+       text: 'Que nous apprennent 10 ans de commits GIT ?\nArchi\n' },
+    webDetection: null,
+    productSearchResults: null,
+    context: null } ]
+```
+
