@@ -1,0 +1,15 @@
+{
+  "name": "jgsgfs",
+  "version": "1.0.0",
+  "description": "## Qu'est-ce qu'on peut faire avec ?",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "sega",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/storage": "^2.5.0",
+    "@google-cloud/vision": "^1.1.2"
+  }
+}
