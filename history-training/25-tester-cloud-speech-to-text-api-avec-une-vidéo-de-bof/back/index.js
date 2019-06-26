@@ -11,35 +11,25 @@ const config = require('./config.json');
 'use strict';
 const result_bucket = config.RESULTS_BUCKET;
 
+/**
+ * HTTP Cloud Function
+ *
+ * @param {Object} req Cloud Function request context.
+ * @param {Object} res Cloud Function response context.
+ */
 exports.helloGet = (req,res) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.send("Hello World!");
 };
 
-// exports.uploaderToGCS = (req,res) => {
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-
-//   const bucketName = result_bucket;
-//   const filename = req.body.name;
-
-//   // Uploads a local file to the bucket
-//   await storage.bucket(bucketName).upload(filename, {
-//     // Support for HTTP requests made with `Accept-Encoding: gzip`
-//     gzip: true,
-//     // By setting the option `destination`, you can change the name of the
-//     // object you are uploading to a bucket.
-//     metadata: {
-//       // Enable long-lived HTTP caching headers
-//       // Use only if the contents of the file will never change
-//       // (If the contents will change, use cacheControl: 'no-cache')
-//       cacheControl: 'public, max-age=31536000',
-//     },
-//   });
-//   res.send(`${filename} uploaded to ${bucketName}.`);
-// }
-
+/**
+ * Background Cloud Function to be triggered by Cloud Storage.
+ * Simply logs the trigger properties.
+ *
+ * @param {object} data The event payload.
+ * @param {object} context The event metadata.
+ */
 exports.watchStorage = (data, context) => {
   const file = data;
   console.log(`  Event ${context.eventId}`);
@@ -51,14 +41,28 @@ exports.watchStorage = (data, context) => {
   console.log(`  Updated: ${file.updated}`);
 }
 
+/**
+ * Background Cloud Function to be triggered by Cloud Storage.
+ * Transcripts the audio file uploaded.
+ *
+ * @param {object} data The event payload.
+ * @param {object} context The event metadata.
+ */
 exports.getRecording = (data,context) => {
   const file = data;
   if (file.resourceState === 'not_exists') {
-    // Ignore file deletions
+    console.log(`File ${file.name} deleted.`);
     return true;
-  } else if (!new RegExp(/\.(wav)/g).test(file.name)) {
+  } else if (file.metageneration === '1') {
+    // metageneration attribute is updated on metadata changes.
+    // on create value is 1
+    console.log(`File ${file.name} uploaded.`);
+  } else {
+    console.log(`File ${file.name} metadata updated.`);
+  }
+  if (!new RegExp(/\.(wav)/g).test(file.name)) {
     // Ignore changes to non-audio files
-    console.log('Not a .wav file')
+    console.log(`File ${file.name} is not a .wav file`);
     return true;
   }
 

@@ -234,5 +234,17 @@ const client_speech = new speech.SpeechClient(options);
 
 ### Transcript d'un fichier sur GCS
 
+L'unique différence provient du JSON `audio`:
 
+```json
+const audio = {
+    uri: `gs://${file.bucket}/${file.name}`
+  };
+```
 
+### Note importante : l'authentification
+
+Inclure ce service ne pose aucun soucis à part l'authentification, qui est gérée grâce aux Application Default Credentials (ADC). C'est une "stratégie" intégrée à Cloud Functions, qui cherchera tous les comptes de service possibles pour les utiliser lors du *runtime*. Plus d'informations sur son fonctionnement [ici](Application Default Credentials (ADC)).
+
+Attention quand même : pour les APIs de ML, GCP demande une clé API, à fournir avec la commande
+`export GOOGLE_APPLICATION_CREDENTIALS=/path/to/file/keyfile.json`

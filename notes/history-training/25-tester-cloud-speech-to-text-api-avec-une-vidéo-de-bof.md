@@ -94,7 +94,7 @@ Result :
 
 Sont affichés les textes retrouvés par l'API, avec un **score de confiance** pour chaque groupe de mots. On peut noter que le résultat sera renvoyé uniquement ici, et on ne pourra donc pas le retrouver ailleurs.
 
-### Commande asynchrone 
+#### Commande asynchrone 
 
 On effectue une commande asynchrone pour un fichier long, car le service ne peut pas renvoyer une réponse immédiate. Plus de détails sur la commande associée [ici](https://cloud.google.com/sdk/gcloud/reference/ml/speech/recognize-long-running?hl=fr).
 
@@ -154,8 +154,8 @@ Avec le tag `—async`, on n'a pas besoin d'attendre la fin de l'opération. On 
 ### Erreurs rencontrées et comment les corriger
 
 * `ERROR: (gcloud.ml.speech.recognize) INVALID_ARGUMENT: Invalid recognition 'config': bad encoding..`
-  Dû à l'encodage du fichier utilisé comme input, non géré par l'API Speech-to-Text. C'est pour cette raison que j'utilise des fichiers `.wav` plutôt que `.mp4` (attention format `!=` encodage)
-  Doc à utiliser si on ne s'en sert pas : [celle-là](https://cloud.google.com/speech-to-text/docs/encoding?hl=fr)
+  Dû à l'encodage du fichier utilisé comme input, non géré par l'API Speech-to-Text. C'est pour cette raison que j'utilise des fichiers `.wav` plutôt que `.mp3` (attention format `!=` encodage)
+  Doc à utiliser si on veut rester sur du `.mp3` : [celle-là](https://cloud.google.com/speech-to-text/docs/encoding?hl=fr)
 * `ERROR: (gcloud.ml.speech.recognize) INVALID_ARGUMENT: Request payload size exceeds the limit: 10485760 bytes.`
   Dû à la taille trop importante du fichier, généralement pour une requête avec un fichier local.
   Quelques infos sur les quotas [sur la doc](https://cloud.google.com/speech-to-text/quotas?hl=fr)
@@ -164,3 +164,87 @@ Avec le tag `—async`, on n'a pas besoin d'attendre la fin de l'opération. On 
 
 ## Via la librairie cliente NodeJS
 
+Initialisation : `npm install --save @google-cloud/speech`
+
+### Quickstart
+
+```javascript
+async function main() {
+  // Imports the Google Cloud client library
+  const speech = require('@google-cloud/speech');
+  const fs = require('fs');
+
+  // Creates a client
+  const client = new speech.SpeechClient();
+
+  // The name of the audio file to transcribe
+  const fileName = './resources/audio.raw';
+
+  // Reads a local audio file and converts it to base64
+  const file = fs.readFileSync(fileName);
+  const audioBytes = file.toString('base64');
+
+  // The audio file's encoding, sample rate in hertz, and BCP-47 language code
+  const audio = {
+    content: audioBytes,
+  };
+  const config = {
+    encoding: 'LINEAR16',
+    sampleRateHertz: 16000,
+    languageCode: 'en-US',
+  };
+  const request = {
+    audio: audio,
+    config: config,
+  };
+
+  // Detects speech in the audio file
+  const [response] = await client.recognize(request);
+  const transcription = response.results
+    .map(result => result.alternatives[0].transcript)
+    .join('\n');
+  console.log(`Transcription: ${transcription}`);
+}
+main().catch(console.error);
+```
+
+Le code provient du [joli quickstart](https://cloud.google.com/speech-to-text/docs/quickstart-client-libraries) de GCP. Il consiste en une fonction asynchrone qui utilise le module [@google-cloud/speech](https://www.npmjs.com/package/@google-cloud/speech).
+
+On peut ensuite le lancer avec `node test_speech.js`, sans passer par une Cloud Function.
+
+**ATTENTION :** L'erreur suivante apparaît parfois
+
+```json
+Error: Quota exceeded for quota metric 'speech.googleapis.com/default_requests' and limit 'DefaultRequestsPerMinutePerProject' of service 'speech.googleapis.com' for consumer 'project_number:764086051850'.
+```
+
+Bizarrement, elle est renvoyée lorsque la variable d'environnement `GOOGLE_APPLICATION_CREDENTIALS` n'est pas spécifiée (et quand il y'a une limite de quota atteinte *of course*)
+
+Il faut donc exécuter `export GOOGLE_APPLICATION_CREDENTIALS=/path/to/file/keyfile.json`
+
+**Note :** On peut aussi initialiser `speech.SpeechClient()` avec un json `options` comme ceci :
+
+```javascript
+const options = {
+    projectId: 'stage-bof-search',
+    keyFilename: './stage-bof-search-6df2ee0cb3b0.json'
+  };
+const client_speech = new speech.SpeechClient(options);
+```
+
+### Transcript d'un fichier sur GCS
+
+L'unique différence provient du JSON `audio`:
+
+```json
+const audio = {
+    uri: `gs://${file.bucket}/${file.name}`
+  };
+```
+
+### Note importante : l'authentification
+
+Inclure ce service ne pose aucun soucis à part l'authentification, qui est gérée grâce aux Application Default Credentials (ADC). C'est une "stratégie" intégrée à Cloud Functions, qui cherchera tous les comptes de service possibles pour les utiliser lors du *runtime*. Plus d'informations sur son fonctionnement [ici](Application Default Credentials (ADC)).
+
+Attention quand même : pour les APIs de ML, GCP demande une clé API, à fournir avec la commande
+`export GOOGLE_APPLICATION_CREDENTIALS=/path/to/file/keyfile.json`
