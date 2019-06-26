@@ -1,0 +1,31 @@
+{
+  "name": "stage-bof-search",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "mocha test/*.test.js --timeout=20000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@gitlab.com/octo-cna/stage-bof-search.git"
+  },
+  "author": "SEGA",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://gitlab.com/octo-cna/stage-bof-search/issues"
+  },
+  "homepage": "https://gitlab.com/octo-cna/stage-bof-search#readme",
+  "dependencies": {
+    "@google-cloud/language": "^3.0.0",
+    "@google-cloud/nodejs-repo-tools": "^3.3.0",
+    "@google-cloud/speech": "^3.1.1",
+    "@google-cloud/storage": "^2.5.0",
+    "got": "^9.6.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "mocha": "^6.1.4",
+    "sinon": "^7.3.2",
+    "uuid": "^3.3.2"
+  }
+}
