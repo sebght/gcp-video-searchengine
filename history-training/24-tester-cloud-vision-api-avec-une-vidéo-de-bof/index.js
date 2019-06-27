@@ -10,7 +10,7 @@ const client = new vision.ImageAnnotatorClient();
 const bucketName = 'empty-for-test';
 const fileName = 'slide1-git.jpg';
 
-async function main(){
+async function detectTextGCS(){
     // Performs text detection on the gcs file
     const [result] = await client.textDetection(`gs://${bucketName}/${fileName}`);
     const detections = result.textAnnotations;
@@ -22,6 +22,56 @@ async function detectFulltextGCS() {
     const [result] = await client.documentTextDetection(`gs://${bucketName}/${fileName}`);
     const fullTextAnnotation = result.fullTextAnnotation;
     console.log(fullTextAnnotation.text);
+}
+async function batchAnnotateGCS() {
+    // GCS path where the pdf file resides
+    const gcsSourceUri = 'gs://my-bucket/my_pdf.pdf';
+
+    const inputConfig = {
+        // Supported mime_types are: 'application/pdf' and 'image/tiff'
+        mimeType: 'application/pdf',
+        gcsSource: {
+        uri: gcsSourceUri,
+        },
+    };
+    const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
+    const request = {
+        requests: [
+        {
+            inputConfig: inputConfig,
+            features: features,
+            // Annotate the first two pages and the last one (max 5 pages)
+            // First page starts at 1, and not 0. Last page is -1.
+            pages: [1, 2, -1],
+        },
+        ],
+    };
+
+    const [result] = await client.batchAnnotateFiles(request);
+    const responses = result.responses[0].responses;
+
+    for (const response of responses) {
+        for (const page of response.fullTextAnnotation.pages) {
+        for (const block of page.blocks) {
+            console.log(`Block confidence: ${block.confidence}`);
+            for (const paragraph of block.paragraphs) {
+            console.log(` Paragraph confidence: ${paragraph.confidence}`);
+            for (const word of paragraph.words) {
+                const symbol_texts = word.symbols.map(symbol => symbol.text);
+                const word_text = symbol_texts.join('');
+                console.log(
+                `  Word text: ${word_text} (confidence: ${word.confidence})`
+                );
+                for (const symbol of word.symbols) {
+                console.log(
+                    `   Symbol: ${symbol.text} (confidence: ${symbol.confidence})`
+                );
+                }
+            }
+            }
+        }
+        }
+    }
 }
 
 /**
@@ -67,5 +117,5 @@ exports.analyzeSlide = (data, context) => {
         })
 }
   
-// main().catch(console.error);
+// detectTextGCS().catch(console.error);
 // detectFulltextGCS().catch(console.error);
