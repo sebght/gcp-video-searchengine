@@ -1,5 +1,5 @@
 .template_build: &template_build # Template commun aux deux jobs de la stage build
   stage: build # On lie les jobs au stage de build
   image: node:8-alpine # On utilise l’image de node 8
-  except: # On définit une règle d'exécution : ce job ne se fera pas sur master
-    - master
+  # except: # On définit une règle d'exécution : ce job ne se fera pas sur master
+  #   - master
