@@ -29,6 +29,8 @@ build:front:
       - ./bof-search-app/front/dist
       - ./bof-search-app/front/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
+    refs:
+      - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -40,6 +42,8 @@ lint:front:
   script: # Les scripts exécutés pendant ce job
     - npm run lint
   only:
+    refs:
+      - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -51,6 +55,8 @@ test:unit_front:
   script: # Les scripts exécutés pendant ce job
     - npm run test:unit
   only:
+    refs:
+      - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -63,6 +69,8 @@ deploy:back:
     - cd bof-search-app/back
     - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --runtime nodejs8 --service-account ${GCP_CF_SERVICE_ACCOUNT}
   only:
+    refs:
+      - merge_requests
     changes:
       - "bof-search-app/back/*"
 
@@ -75,6 +83,8 @@ deploy:front_demo:
     - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
     - gsutil -m -q rsync -R -d ./bof-search-app/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
   only:
+    refs:
+      - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -89,5 +99,4 @@ deploy:front_demo:
   only:
     refs:
       - tags
-    changes:
-      - "bof-search-app/front/*"
+      
