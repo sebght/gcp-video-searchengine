@@ -1,6 +1,7 @@
 variables:
   GCP_FUNCTION_NAME: helloGet
   GCP_ZONE: us-central1
+  FRONT_BUCKET: pulumi.octo-bof-se.ga
 
 stages:
   - build
@@ -29,8 +30,8 @@ build:front:
       - ./bof-search-app/front/dist
       - ./bof-search-app/front/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
-    refs:
-      - merge_requests
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -42,8 +43,8 @@ lint:front:
   script: # Les scripts exécutés pendant ce job
     - npm run lint
   only:
-    refs:
-      - merge_requests
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -55,48 +56,38 @@ test:unit_front:
   script: # Les scripts exécutés pendant ce job
     - npm run test:unit
   only:
-    refs:
-      - merge_requests
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
 
 deploy:back:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: demo
-    url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
-  script:
+  extends: .template_deploy
+  brefore_script:
     - cd bof-search-app/back
-    - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --runtime nodejs8 --service-account ${GCP_CF_SERVICE_ACCOUNT}
+    - pulumi stack select sebght/bof-search-app/back
+    - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
+  script:
+    - pulumi up
   only:
-    refs:
-      - merge_requests
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/back/*"
 
-deploy:front_demo:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: demo
-    url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
+deploy:front:
+  extends: .template_deploy
+  before_script:
+    - cd bof-search-app/front
+    - pulumi stack select sebght/bof-search-app/front
+    - pulumi config set static-website:pathToWebsiteContents ./dist
+    - pulumi config set static-website:bucketName ${FRONT_BUCKET}
+    - pulumi config set static-website:region ${GCP_ZONE}
   script:
-    - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
-    - gsutil -m -q rsync -R -d ./bof-search-app/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
+    - pulumi up
   only:
-    refs:
-      - merge_requests
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
-
-.deploy:front_production:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: production
-    url: http://production-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de production
-  script:
-    - gsutil defacl ch -u AllUsers:READER gs://production-gitlab-ci # donne l'acces de lecture a tout public
-    - gsutil -m -q rsync -R -d ./bof-search-app/front/dist gs://production-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
-  only:
-    refs:
-      - tags
       
