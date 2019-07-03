@@ -63,7 +63,7 @@ test:unit_front:
 
 deploy:back:
   extends: .template_deploy
-  brefore_script:
+  before_script:
     - cd bof-search-app/back
     - pulumi stack select sebght/bof-search-app/back
     - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
