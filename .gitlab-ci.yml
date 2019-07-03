@@ -12,7 +12,7 @@ stages:
 include:
   - local: '/bof-search-app/gitlab/template_build.yml'
   - local: '/bof-search-app/gitlab/template_lint_and_test.yml'
-  - local: '/bof-search-app/gitlab/deploy_template.yml'
+  - local: '/bof-search-app/gitlab/template_deploy.yml'
 
 build:front:
   extends: .template_build
