@@ -1,4 +1,4 @@
-.deploy_template: &deploy_template # On definit notre template pour le deploiement de notre application
+.template_deploy: &template_deploy # On definit notre template pour le deploiement de notre application
   stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
   image: pulumi/pulumi:latest
   before_script: # Avant le script principal nous faisons :
