@@ -37,24 +37,6 @@ build:front:
     changes:
       - "bof-search-app/front/*"
 
-build:back:
-  extends: .template_build
-  before_script:
-    - cd bof-search-app/back
-  script: # Les scripts exécutés pendant ce job
-    - npm install
-  after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
-    - cp bof-search-app/back/package.json bof-search-app/back/dist/package.json
-  cache: # on définit notre cache
-    policy: push
-    paths:
-      - ./bof-search-app/back/node_modules
-  only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
-    # refs:
-    #   - merge_requests
-    changes:
-      - "bof-search-app/back/*"
-
 lint:front:
   extends: .template_lint_and_test
   stage: lint # On lie le job au stage de lint
@@ -88,6 +70,7 @@ deploy:back:
     - pulumi stack select sebght/bof-search-app/back
     - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
   script:
+    - npm i
     - pulumi up
   only:
     # refs:

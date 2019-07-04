@@ -12,7 +12,7 @@ describe('GCF API', () => {
 
     it('should fetch API with the good params', async () => {
       // given
-      const resp = {data: 'GCF resp'}
+      const resp = { data: 'GCF resp' }
       axios.get.mockResolvedValue(resp)
 
       // when
@@ -24,7 +24,7 @@ describe('GCF API', () => {
 
     it('should return only the data', async () => {
       // given
-      const resp = {data: 'Hello World!', headers: {}}
+      const resp = { data: 'Hello World!', headers: {} }
       axios.get.mockResolvedValue(resp)
 
       // when
@@ -35,5 +35,3 @@ describe('GCF API', () => {
     })
   })
 })
-
-
