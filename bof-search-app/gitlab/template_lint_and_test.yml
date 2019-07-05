@@ -1,6 +1,7 @@
 .template_lint_and_test: &template_lint_and_test # Définition du template pour les codes style et les tests
   image: node:8-alpine # On utilise l’image de node 8
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    key: node_modules
     paths:
       - ./node_modules
     policy: pull

@@ -4,6 +4,7 @@
   before_script: # Avant le script principal nous faisons :
     - pulumi login
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    key: node_modules
     paths:
       - ./dist
     policy: pull
