@@ -2,7 +2,7 @@
   stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
   image: 
     name: pulumi/pulumi:latest
-    entrypoint: []
+    entrypoint: ["/bin/sh", "-c"]
   before_script: # Avant le script principal nous faisons :
     - login
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
