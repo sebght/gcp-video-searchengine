@@ -67,11 +67,11 @@ deploy:back:
   extends: .template_deploy
   before_script:
     # - cd bof-search-app/back
-    - pulumi stack select sebght/bof-search-app/back -C ./bof-search-app/back
-    - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME} -C ./bof-search-app/back
+    - stack select sebght/bof-search-app/back -C ./bof-search-app/back
+    - config set gcf:functionName ${GCP_FUNCTION_NAME} -C ./bof-search-app/back
   script:
     # - npm i
-    - pulumi up -C ./bof-search-app/back
+    - up -C ./bof-search-app/back
   only:
     # refs:
     #   - merge_requests
@@ -82,12 +82,12 @@ deploy:front:
   extends: .template_deploy
   before_script:
     # - cd bof-search-app/front
-    - pulumi stack select sebght/bof-search-app/front -C ./bof-search-app/front
-    - pulumi config set static-website:pathToWebsiteContents ./dist -C ./bof-search-app/front
-    - pulumi config set static-website:bucketName ${FRONT_BUCKET} -C ./bof-search-app/front
-    - pulumi config set static-website:region ${GCP_ZONE} -C ./bof-search-app/front
+    - stack select sebght/bof-search-app/front -C ./bof-search-app/front
+    - config set static-website:pathToWebsiteContents ./dist -C ./bof-search-app/front
+    - config set static-website:bucketName ${FRONT_BUCKET} -C ./bof-search-app/front
+    - config set static-website:region ${GCP_ZONE} -C ./bof-search-app/front
   script:
-    - pulumi up -C ./bof-search-app/front
+    - up -C ./bof-search-app/front
   only:
     # refs:
     #   - merge_requests
