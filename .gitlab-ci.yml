@@ -80,13 +80,12 @@ deploy:back:
 
 deploy:front:
   extends: .template_deploy
-  before_script:
+  script:
     - cd bof-search-app/front
     - pulumi stack select sebght/bof-search-app/front
     - pulumi config set static-website:pathToWebsiteContents ./dist
     - pulumi config set static-website:bucketName ${FRONT_BUCKET}
     - pulumi config set static-website:region ${GCP_ZONE}
-  script:
     - pulumi up
   only:
     # refs:
