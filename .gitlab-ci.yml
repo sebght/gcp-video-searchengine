@@ -1,6 +1,7 @@
 variables:
   GCP_FUNCTION_NAME: helloGet
-  GCP_ZONE: us-central1
+  GOOGLE_REGION: us-central1
+  GOOGLE_ZONE: us-central1-a
   FRONT_BUCKET: pulumi.octo-bof-se.ga
 
 stages:
@@ -19,7 +20,7 @@ build:front:
   before_script:
     - cd bof-search-app/front
   script: # Les scripts exécutés pendant ce job
-    - echo "VUE_APP_API_URL = https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
+    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
     - npm install
     - npm run build
   after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
@@ -68,6 +69,7 @@ deploy:back:
   script:
     - cd bof-search-app/back
     - pulumi stack select sebght/bof-search-app/back
+    - pulumi refresh
     - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
     - npm i
     - pulumi up
@@ -82,9 +84,10 @@ deploy:front:
   script:
     - cd bof-search-app/front
     - pulumi stack select sebght/bof-search-app/front
+    - pulumi refresh
     - pulumi config set static-website:pathToWebsiteContents ./dist
     - pulumi config set static-website:bucketName ${FRONT_BUCKET}
-    - pulumi config set static-website:region ${GCP_ZONE}
+    - pulumi config set static-website:region ${GOOGLE_REGION}
     - pulumi up
   only:
     # refs:
