@@ -82,10 +82,11 @@ deploy:back:
 deploy:front:
   extends: .template_deploy
   script:
-    - cd bof-search-app/front
+    - cd bof-search-app/front/pulumi
     - pulumi stack select sebght/bof-search-app/front
+    - npm i
     - pulumi refresh
-    - pulumi config set static-website:pathToWebsiteContents ./dist
+    - pulumi config set static-website:pathToWebsiteContents ../dist
     - pulumi config set static-website:bucketName ${FRONT_BUCKET}
     - pulumi config set static-website:region ${GOOGLE_REGION}
     - pulumi up

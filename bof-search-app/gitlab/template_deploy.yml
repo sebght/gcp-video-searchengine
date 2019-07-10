@@ -14,5 +14,4 @@
     key: node_modules
     paths:
       - ./bof-search-app/front/dist
-      - ./bof-search-app/front/node_modules
     policy: pull

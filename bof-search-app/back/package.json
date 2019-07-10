@@ -3,13 +3,13 @@
     "repository": {
         "type": "git",
         "url": "git+ssh://git@gitlab.com/octo-cna/stage-bof-search.git"
-      },
-      "author": "SEGA",
-      "license": "ISC",
-      "bugs": {
+    },
+    "author": "SEGA",
+    "license": "ISC",
+    "bugs": {
         "url": "https://gitlab.com/octo-cna/stage-bof-search/issues"
-      },
-      "homepage": "https://gitlab.com/octo-cna/stage-bof-search#readme",
+    },
+    "homepage": "https://gitlab.com/octo-cna/stage-bof-search#readme",
     "devDependencies": {
         "@types/node": "latest"
     },
