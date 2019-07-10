@@ -14,4 +14,5 @@
     key: node_modules
     paths:
       - ./dist
+      - ./node_modules
     policy: pull
