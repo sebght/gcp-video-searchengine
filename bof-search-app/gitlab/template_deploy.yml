@@ -13,6 +13,6 @@
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
     key: node_modules
     paths:
-      - ./dist
-      - ./node_modules
+      - ./bof-search-app/front/dist
+      - ./bof-search-app/front/node_modules
     policy: pull
