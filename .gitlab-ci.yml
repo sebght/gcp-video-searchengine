@@ -1,5 +1,5 @@
 variables:
-  GCP_FUNCTION_NAME: helloGet
+  GCP_FUNCTION_NAME: helloGet_bof_search
   GOOGLE_REGION: us-central1
   GOOGLE_ZONE: us-central1-a
   FRONT_BUCKET: pulumi.octo-bof-se.ga

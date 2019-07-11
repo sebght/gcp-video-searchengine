@@ -21,6 +21,7 @@ const config = {
 const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   name: config.bucketName,
   location: config.region,
+  bucketPolicyOnly: true,
   websites: [
     {
       mainPageSuffix: "index.html"
@@ -28,9 +29,9 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   ]
 });
 
-const member = new gcp.storage.BucketIAMMember("member", {
+const binding = new gcp.storage.BucketIAMBinding("member", {
   bucket: config.bucketName,
-  member: "group:allUsers",
+  members: ["group:allUsers"],
   role: "roles/storage.objectViewer",
 });
 
