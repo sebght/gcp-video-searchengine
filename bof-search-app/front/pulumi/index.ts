@@ -30,7 +30,7 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
 
 const member = new gcp.storage.BucketIAMMember("member", {
   bucket: config.bucketName,
-  member: "user:allUsers",
+  member: "group:allUsers",
   role: "roles/storage.objectViewer",
 });
 
