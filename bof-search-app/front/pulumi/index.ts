@@ -23,16 +23,15 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   location: config.region,
   websites: [
     {
-      mainPageSuffix: "index.html",
-      notFoundPage: "404.html"
+      mainPageSuffix: "index.html"
     }
   ]
 });
 
-// TODO replace 'Lecteur des anciens ensembles' par 'Lecteur normal'
-const defaultAcl = new gcp.storage.BucketACL("pulumi-demo-acl", {
-  bucket: siteBucket.name,
-  predefinedAcl: 'publicRead',
+const member = new gcp.storage.BucketIAMMember("member", {
+  bucket: config.bucketName,
+  member: "user:allUsers",
+  role: "roles/storage.objectViewer",
 });
 
 // crawlDirectory recursive crawls the provided directory, applying the provided function

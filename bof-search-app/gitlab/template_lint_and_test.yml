@@ -2,7 +2,7 @@
   image: node:8-alpine # On utilise l’image de node 8
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
     policy: pull
-    key: node_modules
+    key: cache_front
     paths:
       - ./bof-search-app/front/node_modules
   when: on_success # Condition d'exécution : sera exécuté uniquement si les jobs de l'étape précédente réussissent

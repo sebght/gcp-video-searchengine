@@ -23,11 +23,9 @@ build:front:
     - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
     - npm install
     - npm run build
-  after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
-    - cp bof-search-app/front/package.json bof-search-app/front/dist/package.json
   cache: # on définit notre cache
     policy: push
-    key: node_modules
+    key: cache_front
     paths:
       - ./bof-search-app/front/dist
       - ./bof-search-app/front/node_modules
@@ -81,6 +79,11 @@ deploy:back:
 
 deploy:front:
   extends: .template_deploy
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    key: cache_front
+    paths:
+      - ./bof-search-app/front/dist
+    policy: pull
   script:
     - cd bof-search-app/front/pulumi
     - pulumi stack select sebght/bof-search-app/front

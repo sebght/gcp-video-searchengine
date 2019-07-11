@@ -10,8 +10,3 @@
     - gcloud --quiet config set project ${GCP_PROJECT_ID}
   after_script: # Après le script principal nous faisons :
     - rm /tmp/$CI_PIPELINE_ID.json  # On supprime toute trace de nos credentials GCP
-  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
-    key: node_modules
-    paths:
-      - ./bof-search-app/front/dist
-    policy: pull
