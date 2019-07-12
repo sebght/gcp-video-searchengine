@@ -31,7 +31,7 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
 
 const binding = new gcp.storage.BucketIAMBinding("member", {
   bucket: config.bucketName,
-  members: ["group:allUsers"],
+  members: ["allUsers"],
   role: "roles/storage.objectViewer",
 });
 
