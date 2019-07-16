@@ -1,15 +1,24 @@
 import * as gcp from "@pulumi/gcp";
-import * as pulumi from "@pulumi/pulumi";
+import { asset } from "@pulumi/pulumi";
 
-const stackConfig = new pulumi.Config("gcf");
-const config = {
-  functionName: stackConfig.require("functionName")
-};
+const functionName = "helloGet";
 
-let greeting = new gcp.cloudfunctions.HttpCallbackFunction(config.functionName, (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.send("Hello World!");
+const bucket = new gcp.storage.Bucket(`${functionName}_bofsearch`);
+
+const bucketObjecthw = new gcp.storage.BucketObject("hw-zip", {
+  bucket: bucket.name,
+  source: new asset.AssetArchive({
+      ".": new asset.FileArchive("./hw-func"),
+  }),
 });
 
-export let url = greeting.httpsTriggerUrl;
+const functionhw = new gcp.cloudfunctions.Function(functionName, {
+  sourceArchiveBucket: bucket.name,
+  runtime: "nodejs10",
+  sourceArchiveObject: bucketObjecthw.name,
+  entryPoint: "handler",
+  httpsTriggerUrl: `https://us-central1-stage-bof-search.cloudfunctions.net/${functionName}`,
+  triggerHttp: true,
+});
+
+export let helloGetEndpoint = functionhw.httpsTriggerUrl;

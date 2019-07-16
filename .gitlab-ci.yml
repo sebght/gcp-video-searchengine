@@ -1,5 +1,4 @@
 variables:
-  GCP_FUNCTION_NAME: helloGet_bof_search
   GOOGLE_REGION: us-central1
   GOOGLE_ZONE: us-central1-a
   FRONT_BUCKET: pulumi.octo-bof-se.ga
@@ -68,7 +67,6 @@ deploy:back:
     - cd bof-search-app/back
     - pulumi stack select sebght/bof-search-app/back
     - pulumi refresh
-    - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
     - npm i
     - pulumi up
   only:
