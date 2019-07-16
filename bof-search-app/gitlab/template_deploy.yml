@@ -1,0 +1,12 @@
+.template_deploy: &template_deploy # On definit notre template pour le deploiement de notre application
+  stage: deploy # On lie nos prochains jobs avec le stage 'deploy'
+  image: 
+    name: pulumi/pulumi:latest
+    entrypoint: [""]
+  before_script: # Avant le script principal nous faisons :
+    - pulumi login
+    - echo ${GOOGLE_CREDENTIALS} > /tmp/${CI_PIPELINE_ID}.json # Nous récuperons notre variable 'GCP_CREDENTIALS' et on la sauvegarde dans un fichier
+    - export GOOGLE_APPLICATION_CREDENTIALS=/tmp/${CI_PIPELINE_ID}.json
+    - gcloud --quiet config set project ${GCP_PROJECT_ID}
+  after_script: # Après le script principal nous faisons :
+    - rm /tmp/$CI_PIPELINE_ID.json  # On supprime toute trace de nos credentials GCP

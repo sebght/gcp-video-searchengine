@@ -1,6 +1,8 @@
 variables:
-  GCP_FUNCTION_NAME: helloGet
-  GCP_ZONE: us-central1
+  GCP_FUNCTION_NAME: helloGet_bof_search
+  GOOGLE_REGION: us-central1
+  GOOGLE_ZONE: us-central1-a
+  FRONT_BUCKET: pulumi.octo-bof-se.ga
 
 stages:
   - build
@@ -11,26 +13,28 @@ stages:
 include:
   - local: '/bof-search-app/gitlab/template_build.yml'
   - local: '/bof-search-app/gitlab/template_lint_and_test.yml'
-  - local: '/bof-search-app/gitlab/deploy_template.yml'
+  - local: '/bof-search-app/gitlab/template_deploy.yml'
 
 build:front:
   extends: .template_build
   before_script:
     - cd bof-search-app/front
   script: # Les scripts exécutés pendant ce job
-    - echo "VUE_APP_API_URL = https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
+    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
     - npm install
     - npm run build
-  after_script: # On sauvegarde le fichier package.json dans le répertoire "dist" pour le mettre en cache
-    - cp bof-search-app/front/package.json bof-search-app/front/dist/package.json
   cache: # on définit notre cache
     policy: push
+    key: cache_front
     paths:
       - ./bof-search-app/front/dist
       - ./bof-search-app/front/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
+
 
 lint:front:
   extends: .template_lint_and_test
@@ -40,6 +44,8 @@ lint:front:
   script: # Les scripts exécutés pendant ce job
     - npm run lint
   only:
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
 
@@ -51,43 +57,45 @@ test:unit_front:
   script: # Les scripts exécutés pendant ce job
     - npm run test:unit
   only:
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
 
 deploy:back:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: demo
-    url: https://${GCP_ZONE}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME} # on indique l'url de notre application de demo
+  extends: .template_deploy
   script:
     - cd bof-search-app/back
-    - gcloud functions deploy ${GCP_FUNCTION_NAME} --trigger-http --runtime nodejs8 --service-account ${GCP_CF_SERVICE_ACCOUNT}
+    - pulumi stack select sebght/bof-search-app/back
+    - pulumi refresh
+    - pulumi config set gcf:functionName ${GCP_FUNCTION_NAME}
+    - npm i
+    - pulumi up
   only:
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/back/*"
 
-deploy:front_demo:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: demo
-    url: http://demo-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de demo
+deploy:front:
+  extends: .template_deploy
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    key: cache_front
+    paths:
+      - ./bof-search-app/front/dist
+    policy: pull
   script:
-    - gsutil defacl ch -u AllUsers:READER gs://demo-gitlab-ci # donne l'acces de lecture a tout public
-    - gsutil -m -q rsync -R -d ./bof-search-app/front/dist gs://demo-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
+    - cd bof-search-app/front/pulumi
+    - pulumi stack select sebght/bof-search-app/front
+    - npm i
+    - pulumi refresh
+    - pulumi config set static-website:pathToWebsiteContents ../dist
+    - pulumi config set static-website:bucketName ${FRONT_BUCKET}
+    - pulumi config set static-website:region ${GOOGLE_REGION}
+    - pulumi up
   only:
+    # refs:
+    #   - merge_requests
     changes:
       - "bof-search-app/front/*"
-
-.deploy:front_production:
-  extends: .deploy_template
-  environment: # On définit notre environnement
-    name: production
-    url: http://production-gitlab-ci.storage.googleapis.com/index.html # on indique l'url de notre application de production
-  script:
-    - gsutil defacl ch -u AllUsers:READER gs://production-gitlab-ci # donne l'acces de lecture a tout public
-    - gsutil -m -q rsync -R -d ./bof-search-app/front/dist gs://production-gitlab-ci 	# upload du dossier dist depuis le dir du SDK
-  only:
-    refs:
-      - tags
-    changes:
-      - "bof-search-app/front/*"
+      
