@@ -19,7 +19,7 @@ build:front:
   before_script:
     - cd bof-search-app/front
   script: # Les scripts exécutés pendant ce job
-    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/${GCP_FUNCTION_NAME}" > .env
+    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/helloGet" > .env
     - npm install
     - npm run build
   cache: # on définit notre cache
