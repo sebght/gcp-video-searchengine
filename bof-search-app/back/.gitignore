@@ -82,3 +82,6 @@ typings/
 
 #DynamoDB Local files 
 .dynamodb/ 
+
+# Cloud Endpoint config
+openapi-functions.yaml
