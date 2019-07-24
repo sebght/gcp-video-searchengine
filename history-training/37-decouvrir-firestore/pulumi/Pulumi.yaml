@@ -1,0 +1,3 @@
+name: firestore
+runtime: nodejs
+description: Playground with Firestore
