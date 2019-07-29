@@ -1,13 +1,16 @@
 import axios from "axios";
-const BASE_URL =
-  "https://us-central1-bof-search.cloudfunctions.net/getSignedURL_bof";
+// const BASE_URL = process.env.SIGN_URL;
+// const bucket = process.env.VIDEO_BUCKET;
+const BASE_URL = "https://us-central1-bof-search.cloudfunctions.net/getSignedURL_bof";
+const bucket = "audio-source-bof";
 
 export default {
-  async getSignedURL(bucket, file) {
+  async getSignedURL(title_bof, file) {
+    console.log(BASE_URL);
     let res = await axios
       .post(BASE_URL, {
         bucket: bucket,
-        filename: file.name,
+        filename: `${title_bof}/${file.name}`,
         contentType: file.type
       })
       .catch(function(error) {
