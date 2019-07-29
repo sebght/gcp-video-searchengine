@@ -21,14 +21,16 @@
 
           <v-divider class="my-2"></v-divider>
 
-          <v-item-group multiple>
+          <v-item-group multiple v-model="actions">
             <v-subheader>Je veux upload</v-subheader>
-            <v-item v-for="(item,i) in items" :key="i" v-slot:default="{ active, toggle }">
+            <p>{{ actions }}</p>
+            <v-item v-for="(item,i) in filetypes" :key="i" v-slot:default="{ active, toggle }">
               <v-chip
                 active-class="purple--text"
                 :input-value="active"
                 @click="toggle"
-              >{{ item.message }}</v-chip>
+                value="salut"
+              >{{ item }}</v-chip>
             </v-item>
           </v-item-group>
         </v-card-text>
@@ -39,9 +41,9 @@
           class="ma-3"
           v-model="files"
           counter
+          :rules="[check_filetypes]"
           label="File input"
           multiple
-          required
           placeholder="Importer mes fichiers"
           prepend-icon="mdi-file-upload"
           outlined
@@ -83,19 +85,39 @@ export default {
       v => (v && v.length <= 4) || "Un quadri a maximum 4 lettres"
     ],
     files: [],
-    items: [{ message: "Audio" }, { message: "Slides" }, { message: "Video" }]
+    actions: [],
+    filetypes: ["Audio", "Slides", "Video"]
   }),
 
   methods: {
+    check_filetypes(value) {
+      if (value.length === 0) {
+        return "Quel fichier on upload ?";
+      } else if (value.length > this.actions.length) {
+        return "Trop de fichiers";
+      } else if (value.length < this.actions.length) {
+        return "Pas assez de fichiers";
+      } else {
+        return true;
+      }
+    },
     async validate() {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
         this.loading = true;
-        this.signedUrl = await postToCF.getSignedURL("audio-source-bof",this.files[0]);
-        this.result = await postToCF.uploadFile(this.files[0],this.signedUrl);
+        for (let n = 0; n < this.files.length; n++) {
+          this.signedUrl = await postToCF.getSignedURL(
+            this.title,
+            this.files[n]
+          );
+          this.result = await postToCF.uploadFile(
+            this.files[n],
+            this.signedUrl
+          );
+        }
         this.loading = false;
-        console.log(this.files[0]);
-        console.log(this.url);
+        console.log(this.files);
+        console.log(this.signedUrl);
         console.log(this.result);
       }
     },
