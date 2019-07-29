@@ -17,7 +17,6 @@ const config = {
 };
 
 // contentBucket is the S3 bucket that the website's contents will be stored in.
-// TODO find a way to point to the correct name with the suffix
 const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   name: config.bucketName,
   location: config.region,
