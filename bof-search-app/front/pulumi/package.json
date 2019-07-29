@@ -1,0 +1,11 @@
+{
+    "name": "gcp-typescript",
+    "devDependencies": {
+        "@types/node": "latest",
+        "@types/express": "^4.16.0"
+    },
+    "dependencies": {
+        "@pulumi/gcp": "latest",
+        "@pulumi/pulumi": "latest"
+    }
+}
