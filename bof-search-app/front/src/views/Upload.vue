@@ -1,0 +1,107 @@
+<template>
+  <v-app>
+    <v-card class="ma-5">
+      <v-toolbar flat color="blue-grey" dark>
+        <v-toolbar-title>Poster une BoF</v-toolbar-title>
+      </v-toolbar>
+
+      <v-form ref="form" v-model="valid">
+        <v-card-text>
+          <v-text-field v-model="title" :rules="titleRules" label="Titre" required></v-text-field>
+
+          <v-text-field
+            v-model="quadri"
+            :counter="4"
+            :rules="quadriRules"
+            label="Quadrigramme"
+            required
+          ></v-text-field>
+
+          <v-textarea class="mt-4" label="Description" value></v-textarea>
+
+          <v-divider class="my-2"></v-divider>
+
+          <v-item-group multiple>
+            <v-subheader>Je veux upload</v-subheader>
+            <v-item v-for="(item,i) in items" :key="i" v-slot:default="{ active, toggle }">
+              <v-chip
+                active-class="purple--text"
+                :input-value="active"
+                @click="toggle"
+              >{{ item.message }}</v-chip>
+            </v-item>
+          </v-item-group>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-file-input
+          class="ma-3"
+          v-model="files"
+          counter
+          label="File input"
+          multiple
+          required
+          placeholder="Importer mes fichiers"
+          prepend-icon="mdi-file-upload"
+          outlined
+          :display-size="1000"
+        >
+          <template v-slot:selection="{ index, text }">
+            <v-chip v-if="index < 2" dark label small>{{ text }}</v-chip>
+            <span
+              v-else-if="index === 2"
+              class="overline grey--text text--darken-3 mx-2"
+            >+{{ files.length - 2 }} File(s)</span>
+          </template>
+        </v-file-input>
+
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" class="mr-4" @click="reset">Reset Form</v-btn>
+          <v-btn :disabled="!valid" color="success" class="mr-4" @click="validate">Post</v-btn>
+        </v-card-actions>
+      </v-form>
+    </v-card>
+  </v-app>
+</template>
+
+<script>
+import postToCF from "@/api/cf_postBof";
+
+export default {
+  data: () => ({
+    valid: true,
+    title: "",
+    titleRules: [
+      v => !!v || "Il faut un titre à la BoF",
+      v => (v && v.length <= 10) || "Name must be less than 10 characters"
+    ],
+    quadri: "",
+    quadriRules: [
+      v => !!v || "Donne ton quadri please",
+      v => (v && v.length <= 4) || "Un quadri a maximum 4 lettres"
+    ],
+    files: [],
+    items: [{ message: "Audio" }, { message: "Slides" }, { message: "Video" }]
+  }),
+
+  methods: {
+    async validate() {
+      if (this.$refs.form.validate()) {
+        this.snackbar = true;
+        this.loading = true;
+        this.signedUrl = await postToCF.getSignedURL("audio-source-bof",this.files[0]);
+        this.result = await postToCF.uploadFile(this.files[0],this.signedUrl);
+        this.loading = false;
+        console.log(this.files[0]);
+        console.log(this.url);
+        console.log(this.result);
+      }
+    },
+    reset() {
+      this.$refs.form.reset();
+    }
+  }
+};
+</script>
