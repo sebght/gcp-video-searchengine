@@ -17,7 +17,7 @@
             required
           ></v-text-field>
 
-          <v-textarea class="mt-4" label="Description" value></v-textarea>
+          <v-textarea class="mt-4" v-model="descr" label="Description" value></v-textarea>
 
           <v-divider class="my-2"></v-divider>
 
@@ -69,7 +69,7 @@
 </template>
 
 <script>
-import postToCF from "@/api/cf_postBof";
+import postBOF from "@/api/postBof";
 
 export default {
   data: () => ({
@@ -84,6 +84,7 @@ export default {
       v => !!v || "Donne ton quadri please",
       v => (v && v.length <= 4) || "Un quadri a maximum 4 lettres"
     ],
+    descr: "",
     files: [],
     actions: [],
     filetypes: ["Audio", "Slides", "Video"]
@@ -105,20 +106,33 @@ export default {
       if (this.$refs.form.validate()) {
         this.snackbar = true;
         this.loading = true;
+        this.checkUpload = true;
         for (let n = 0; n < this.files.length; n++) {
-          this.signedUrl = await postToCF.getSignedURL(
+          this.signedUrl = await postBOF.getSignedURL(
             this.title,
             this.files[n]
           );
-          this.result = await postToCF.uploadFile(
+          this.uploadfile = await postBOF.uploadFile(
             this.files[n],
             this.signedUrl
+          );
+          if (typeof this.uploadfile == "undefined") {
+            this.checkUpload = false;
+          }
+        }
+        if (this.checkUpload) {
+          console.log(`Les uploads des ${this.files.length} fichiers sont passés`);
+          this.firestoreUp = await postBOF.updateDB(
+            this.title,
+            this.descr,
+            this.files
           );
         }
         this.loading = false;
         console.log(this.files);
         console.log(this.signedUrl);
-        console.log(this.result);
+        console.log(this.uploadfile);
+        console.log(this.firestoreUp);
       }
     },
     reset() {
