@@ -3,6 +3,9 @@
 .AppleDouble
 .LSOverride
 
+# Use of JetBrains IDEs
+*.idea
+
 # Logs
 logs
 *.log
