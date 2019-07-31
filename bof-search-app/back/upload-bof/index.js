@@ -1,6 +1,9 @@
 const { Storage } = require("@google-cloud/storage");
 const storage = new Storage();
 const Firestore = require('@google-cloud/firestore');
+const db = new Firestore();
+const {PubSub} = require('@google-cloud/pubsub');
+const pubsub = new PubSub();
 
 /**
  * HTTP function that generates a signed URL
@@ -67,7 +70,7 @@ exports.updateFirestore = (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");
 
   if (req.method === "OPTIONS") {
-    console.log(`Responding to an OPTIONS request`);
+    console.log(`Responding to a pre-flight OPTIONS request`);
     // Send response to OPTIONS requests
     res.set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
     res.set("Access-Control-Allow-Headers", "Content-Type");
@@ -78,9 +81,9 @@ exports.updateFirestore = (req, res) => {
     return res.status(405).end();
   }
 
-  const db = new Firestore();
+  console.log(`Responding to a POST request`);
   let docRef = db.collection("bofs").doc();
-  console.log(`Created a new document with id : ${docRef}`);
+  console.log(`Created a new document with id : ${docRef.id}`);
   let setDoc = docRef.set({
     name: req.body.title,
     description: req.body.descr,
@@ -89,5 +92,30 @@ exports.updateFirestore = (req, res) => {
       filename: file.filename
     }))
   })
+  const topicName = process.env.topic;
+  const data = {
+    folder: docRef.id
+  };
+  const dataBuffer = Buffer.from(JSON.stringify(data));
   res.send(docRef.id);
+  return pubsub.topic(topicName).get({autoCreate: true}).then(([topic]) => topic.publish(dataBuffer));
+};
+
+/**
+ * Background Cloud Function to be triggered by Pub/Sub.
+ * This function is exported by index.js, and executed when
+ * the trigger topic receives a message.
+ *
+ * @param {object} pubSubEvent The event payload.
+ * @param {object} context The event metadata.
+ */
+exports.triggerNewBof = (event,context) => {
+  const pubsubData = event.data;
+  const jsonStr = Buffer.from(pubsubData, 'base64').toString();
+  const payload = JSON.parse(jsonStr);
+
+  const bucket = storage.bucket(process.env.bucket);
+  const pathFile = `${payload.folder}/init.json`;
+  console.log(`Creating gs://${pathFile}`);
+  return bucket.file(pathFile).save(JSON.stringify(payload.folder, null))
 };
