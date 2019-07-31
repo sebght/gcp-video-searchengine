@@ -4,6 +4,8 @@ import { asset } from "@pulumi/pulumi";
 const functionhwName = "helloGet"
 const functionsuName = "getSignedURL"
 const functionufName = "updateFirestore"
+const functiontnbName = "triggerNewBof"
+const topicNewBof = "NEW_BOF"
 const bucketName = "sega"
 const regionName = "us-central1"
 
@@ -30,7 +32,7 @@ const functionhw = new gcp.cloudfunctions.Function(functionhwName, {
   name: functionhwName
 });
 
-// Fonction qui renvoit une Signed URL au client
+// Fonction qui renvoie une Signed URL au client
 
 const bucketObjectUploadBof = new gcp.storage.BucketObject("ub-zip", {
   bucket: bucket.name,
@@ -54,7 +56,25 @@ const functionUpFirestore = new gcp.cloudfunctions.Function(functionufName, {
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "updateFirestore",
   triggerHttp: true,
-  name: functionufName
+  name: functionufName,
+  environmentVariables: {
+    topic: topicNewBof
+  }
+});
+
+const triggerBof = new gcp.cloudfunctions.Function(functiontnbName, {
+  sourceArchiveBucket: bucket.name,
+  runtime: "nodejs10",
+  sourceArchiveObject: bucketObjectUploadBof.name,
+  entryPoint: "triggerNewBof",
+  eventTrigger: {
+    eventType: "providers/cloud.pubsub/eventTypes/topic.publish",
+    resource: topicNewBof
+  },
+  environmentVariables: {
+    bucket: "audio-source-bof"
+  },
+  name: functiontnbName
 });
 
 export let helloGetEndpoint = functionhw.httpsTriggerUrl;
