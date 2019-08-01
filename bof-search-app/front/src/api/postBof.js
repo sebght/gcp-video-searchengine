@@ -1,14 +1,14 @@
 import axios from "axios";
+/* eslint-disable no-undef*/
 const SIGN_URL = env.SIGN_URL;
 const FIRESTORE_URL = env.FIRESTORE_URL;
-const bucket = env.VIDEO_BUCKET;
+/* eslint-enable no-undef*/
 
 export default {
-  async getSignedURL(title_bof, file) {
+  async getSignedURL(id_bof, file) {
     let res = await axios
       .post(SIGN_URL, {
-        bucket: bucket,
-        filename: `${title_bof}/${file.name}`,
+        filename: `${id_bof}/${file.name}`,
         contentType: file.type
       })
       .catch(function(error) {
