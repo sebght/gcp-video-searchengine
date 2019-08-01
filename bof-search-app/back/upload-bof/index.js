@@ -2,8 +2,7 @@ const { Storage } = require("@google-cloud/storage");
 const storage = new Storage();
 const Firestore = require('@google-cloud/firestore');
 const db = new Firestore();
-const {PubSub} = require('@google-cloud/pubsub');
-const pubsub = new PubSub();
+const admin = require('firebase-admin');
 
 /**
  * HTTP function that generates a signed URL
@@ -34,7 +33,7 @@ exports.getSignedUrl = (req, res) => {
   // TODO(developer) check that the user is authorized to upload
   console.log(`Getting a reference for the destination file`);
   // Get a reference to the destination file in GCS
-  const file = storage.bucket(req.body.bucket).file(req.body.filename);
+  const file = storage.bucket(process.env.bucket).file(req.body.filename);
 
   // Create a temporary upload URL
   const expiresAtMs = Date.now() + 300000; // Link expires in 5 minutes
@@ -44,15 +43,15 @@ exports.getSignedUrl = (req, res) => {
     contentType: req.body.contentType
   };
 
-  console.log(`Trying to get a Signed URL for uploading ${req.body.filename} in ${req.body.bucket}`);
+  console.log(`Trying to get a signed URL for uploading ${req.body.filename} in ${process.env.bucket}`);
   file.getSignedUrl(config, (err, url) => {
     if (err) {
-      console.log(`There was an error`);
+      console.log(`There was an error while getting it`);
       console.error(err);
       res.status(500).end();
       return;
     }
-    console.log(`No error`);
+    console.log(`Signed url is provided`);
     res.send(url);
   });
 };
@@ -63,7 +62,7 @@ exports.getSignedUrl = (req, res) => {
  * @param {Object} req Cloud Function request context.
  * @param {Object} res Cloud Function response context.
  */
-exports.updateFirestore = (req, res) => {
+exports.createNewBof = async (req, res) => {
   // Set CORS headers for preflight requests
   // Allows GETs from any origin with the Content-Type header
   // and caches preflight response for 3600s
@@ -87,35 +86,41 @@ exports.updateFirestore = (req, res) => {
   let setDoc = docRef.set({
     name: req.body.title,
     description: req.body.descr,
-    files: req.body.files.map(file => ({
-      kind: file.filetype,
-      filename: file.filename
-    }))
-  })
-  const topicName = process.env.topic;
-  const data = {
-    folder: docRef.id
-  };
-  const dataBuffer = Buffer.from(JSON.stringify(data));
+    files: []
+  });
+  const bucket = storage.bucket(process.env.bucket);
+  const pathFile = `${docRef.id}/init.json`;
+  console.log(`Creating gs://${pathFile}`);
+  const result = await bucket.file(pathFile).save(JSON.stringify(docRef.id, null));
   res.send(docRef.id);
-  return pubsub.topic(topicName).get({autoCreate: true}).then(([topic]) => topic.publish(dataBuffer));
+  return result;
 };
 
 /**
- * Background Cloud Function to be triggered by Pub/Sub.
- * This function is exported by index.js, and executed when
- * the trigger topic receives a message.
+ * Background Cloud Function to be triggered by Cloud Storage.
+ * This function reports any file added to the BoF source bucket into Firestore.
  *
- * @param {object} pubSubEvent The event payload.
+ * @param {object} data The event payload.
  * @param {object} context The event metadata.
  */
-exports.triggerNewBof = (event,context) => {
-  const pubsubData = event.data;
-  const jsonStr = Buffer.from(pubsubData, 'base64').toString();
-  const payload = JSON.parse(jsonStr);
+exports.reportsFileUploads = (data,context) => {
+  const file = data;
+  if (file.resourceState === 'not_exists') {
+    console.log(`File ${file.name} deleted.`);
+  } else if (file.metageneration === '1') {
+    // metageneration attribute is updated on metadata changes.
+    // on create value is 1
+    console.log(`File ${file.name} uploaded.`);
 
-  const bucket = storage.bucket(process.env.bucket);
-  const pathFile = `${payload.folder}/init.json`;
-  console.log(`Creating gs://${pathFile}`);
-  return bucket.file(pathFile).save(JSON.stringify(payload.folder, null))
+    const docId = file.name.split('/')[0];
+    let docRef = db.collection("bofs").doc(docId);
+    let setDoc = docRef.update({
+      files: admin.firestore.FieldValue.arrayUnion({
+        kind: file.contentType,
+        filename: file.name
+      })
+    });
+  } else {
+    console.log(`File ${file.name} metadata updated.`);
+  }
 };

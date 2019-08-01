@@ -1,13 +1,13 @@
 import * as gcp from "@pulumi/gcp";
 import { asset } from "@pulumi/pulumi";
 
-const functionhwName = "helloGet"
-const functionsuName = "getSignedURL"
-const functionufName = "updateFirestore"
-const functiontnbName = "triggerNewBof"
-const topicNewBof = "NEW_BOF"
-const bucketName = "sega"
-const regionName = "us-central1"
+const functionhwName = "helloGet";
+const functionsuName = "getSignedURL";
+const functionnbName = "createBof";
+const functionfuName = "reportsFileUploads";
+const bucketName = "sega";
+const regionName = "us-central1";
+const source_bucket = "audio-source-bof";
 
 const bucket = new gcp.storage.Bucket(`${bucketName}_bofsearch`,{
   name: `${bucketName}_bofsearch`,
@@ -47,36 +47,36 @@ const functionSignedURL = new gcp.cloudfunctions.Function(functionsuName, {
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "getSignedUrl",
   triggerHttp: true,
-  name: functionsuName
-});
-
-const functionUpFirestore = new gcp.cloudfunctions.Function(functionufName, {
-  sourceArchiveBucket: bucket.name,
-  runtime: "nodejs10",
-  sourceArchiveObject: bucketObjectUploadBof.name,
-  entryPoint: "updateFirestore",
-  triggerHttp: true,
-  name: functionufName,
+  name: functionsuName,
   environmentVariables: {
-    topic: topicNewBof
+    bucket: source_bucket
   }
 });
 
-const triggerBof = new gcp.cloudfunctions.Function(functiontnbName, {
+const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
+  sourceArchiveBucket: bucket.name,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectUploadBof.name,
+  entryPoint: "createNewBof",
+  triggerHttp: true,
+  name: functionnbName,
+  environmentVariables: {
+    bucket: source_bucket
+  }
+});
+
+const functionFileUploads = new gcp.cloudfunctions.Function(functionfuName, {
   sourceArchiveBucket: bucket.name,
   runtime: "nodejs10",
   sourceArchiveObject: bucketObjectUploadBof.name,
-  entryPoint: "triggerNewBof",
+  entryPoint: "reportsFileUploads",
   eventTrigger: {
-    eventType: "providers/cloud.pubsub/eventTypes/topic.publish",
-    resource: topicNewBof
+    eventType: "providers/cloud.storage/eventTypes/object.finalize",
+    resource: source_bucket
   },
-  environmentVariables: {
-    bucket: "audio-source-bof"
-  },
-  name: functiontnbName
+  name: functionfuName
 });
 
 export let helloGetEndpoint = functionhw.httpsTriggerUrl;
 export let SignedPostEndpoint = functionSignedURL.httpsTriggerUrl;
-export let updateFirestoreEndpoint = functionUpFirestore.httpsTriggerUrl;
+export let createBofEndpoint = functionCreateBof.httpsTriggerUrl;
