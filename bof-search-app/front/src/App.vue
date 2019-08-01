@@ -5,9 +5,9 @@
         <span><router-link to="/">Home</router-link></span>
       </v-toolbar-title>
       <v-spacer />
-      <v-btn text><router-link to="/upload">Upload a BoF</router-link></v-btn>
+      <v-btn text><router-link to="/create">Créer une BoF</router-link></v-btn>
       <v-spacer />
-      <v-btn text><router-link to="/about">Go to About</router-link></v-btn>
+      <v-btn text><router-link to="/upload">Upload files</router-link></v-btn>
       <v-spacer />
       <v-btn
         text
