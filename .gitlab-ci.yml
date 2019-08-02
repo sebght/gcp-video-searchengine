@@ -17,7 +17,7 @@ build:front:
   stage: build # On lie les jobs au stage de build
   image: node:8-alpine # On utilise l’image de node 8
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
     - npm install
     - npm run build
@@ -25,8 +25,8 @@ build:front:
     policy: push
     key: cache_front
     paths:
-      - ./bof-search-app/front/dist
-      - ./bof-search-app/front/node_modules
+      - ./bof-search-app/client/dist
+      - ./bof-search-app/client/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
     # refs:
     #   - merge_requests
@@ -38,7 +38,7 @@ lint:front:
   extends: .template_lint_and_test
   stage: lint # On lie le job au stage de lint
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
     - npm run lint
   only:
@@ -51,7 +51,7 @@ lint:front:
   extends: .template_lint_and_test
   stage: test # On lie le job au stage de test
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
     - npm run test:unit
   only:
