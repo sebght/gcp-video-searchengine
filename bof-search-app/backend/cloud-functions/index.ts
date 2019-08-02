@@ -82,7 +82,7 @@ const functionFileUploads = new gcp.cloudfunctions.Function(functionfuName, {
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "reportsFileUploads",
   eventTrigger: {
-    eventType: "providers/cloud.storage/eventTypes/object.finalize",
+    eventType: "google.storage.object.finalize",
     resource: source_bucket
   },
   name: functionfuName
