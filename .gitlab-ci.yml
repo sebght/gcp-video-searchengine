@@ -10,16 +10,16 @@ stages:
   - deploy
 
 include:
-  - local: '/bof-search-app/gitlab/template_build.yml'
   - local: '/bof-search-app/gitlab/template_lint_and_test.yml'
   - local: '/bof-search-app/gitlab/template_deploy.yml'
 
 build:front:
+  stage: build # On lie les jobs au stage de build
+  image: node:8-alpine # On utilise l’image de node 8
   extends: .template_build
   before_script:
     - cd bof-search-app/front
   script: # Les scripts exécutés pendant ce job
-    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/helloGet" > .env
     - npm install
     - npm run build
   cache: # on définit notre cache
@@ -48,7 +48,7 @@ lint:front:
     changes:
       - "bof-search-app/front/*"
 
-test:unit_front:
+.test:unit_front:
   extends: .template_lint_and_test
   stage: test # On lie le job au stage de test
   before_script:
@@ -61,11 +61,11 @@ test:unit_front:
     changes:
       - "bof-search-app/front/*"
 
-deploy:back:
+deploy:pulumi:
   extends: .template_deploy
   script:
-    - cd bof-search-app/back
-    - pulumi stack select sebght/bof-search-app/back
+    - cd bof-search-app
+    - pulumi stack select sebght/bof-search-app/dev
     - pulumi refresh
     - npm i
     - pulumi up
@@ -73,27 +73,5 @@ deploy:back:
     # refs:
     #   - merge_requests
     changes:
-      - "bof-search-app/back/*"
-
-deploy:front:
-  extends: .template_deploy
-  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
-    key: cache_front
-    paths:
-      - ./bof-search-app/front/dist
-    policy: pull
-  script:
-    - cd bof-search-app/front/pulumi
-    - pulumi stack select sebght/bof-search-app/front
-    - npm i
-    - pulumi refresh
-    - pulumi config set static-website:pathToWebsiteContents ../dist
-    - pulumi config set static-website:bucketName ${FRONT_BUCKET}
-    - pulumi config set static-website:region ${GOOGLE_REGION}
-    - pulumi up
-  only:
-    # refs:
-    #   - merge_requests
-    changes:
-      - "bof-search-app/front/*"
+      - "bof-search-app/*"
       
