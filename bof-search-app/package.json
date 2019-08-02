@@ -10,11 +10,15 @@
         "url": "https://gitlab.com/octo-cna/stage-bof-search/issues"
     },
     "homepage": "https://gitlab.com/octo-cna/stage-bof-search#readme",
-    "devDependencies": {
-        "@types/node": "latest"
-    },
     "dependencies": {
-        "@pulumi/pulumi": "latest",
-        "@pulumi/gcp": "latest"
+        "@google-cloud/firestore": "2.2.4",
+        "@google-cloud/storage": "3.0.4",
+        "@pulumi/gcp": "0.18.14",
+        "@pulumi/pulumi": "0.17.27",
+        "firebase-admin": "8.3.0"
+    },
+    "devDependencies": {
+        "@types/express": "4.17.0",
+        "@types/node": "12.6.8"
     }
 }

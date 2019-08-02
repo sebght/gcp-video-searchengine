@@ -29,7 +29,7 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
 });
 
 const binding = new gcp.storage.BucketIAMBinding("member", {
-  bucket: config.bucketName,
+  bucket: siteBucket.name,
   members: ["allUsers"],
   role: "roles/storage.objectViewer",
 });
@@ -71,3 +71,6 @@ crawlDirectory(webContentsRootPath, (filePath: string) => {
     }
   );
 });
+
+export const siteBucketName = siteBucket.name;
+export const siteBucketWebsiteEndpoint = siteBucket.name.apply(u => `${u}.storage.googleapis.com`);

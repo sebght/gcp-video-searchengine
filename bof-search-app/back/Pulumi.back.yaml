@@ -1,4 +1,0 @@
-config:
-  gcf:functionName: helloGet
-  gcp:project: bof-search
-  gcp:region: us-central1
