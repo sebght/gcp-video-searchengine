@@ -1,4 +1,6 @@
-const { Storage } = require("@google-cloud/storage");
+const {Storage} = require('@google-cloud/storage');
+// import { Storage } from "@google-cloud/storage";
+
 const storage = new Storage();
 const Firestore = require('@google-cloud/firestore');
 const db = new Firestore();
