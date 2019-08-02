@@ -16,7 +16,6 @@ include:
 build:front:
   stage: build # On lie les jobs au stage de build
   image: node:8-alpine # On utilise l’image de node 8
-  extends: .template_build
   before_script:
     - cd bof-search-app/front
   script: # Les scripts exécutés pendant ce job
