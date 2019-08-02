@@ -65,7 +65,7 @@ deploy:pulumi:
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
     key: cache_front
     paths:
-      - ./bof-search-app/front/dist
+      - ./bof-search-app/client/dist
     policy: pull
   script:
     - cd bof-search-app
