@@ -1,4 +1,0 @@
-config:
-  gcp:project: bof-search
-  setup:region: us-central1
-  setup:sourceBucketName: audio-source-bof

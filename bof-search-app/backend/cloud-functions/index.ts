@@ -1,13 +1,20 @@
 import * as gcp from "@pulumi/gcp";
-import { asset } from "@pulumi/pulumi";
+import * as pulumi from "@pulumi/pulumi";
+
+const stackConfig = new pulumi.Config("resources");
+const config = {
+  sourceBucketName: stackConfig.require("sourceBucketName"),
+  region: stackConfig.require("region"),
+  functionsBucketName: stackConfig.require("functionsBucketName")
+};
 
 const functionhwName = "helloGet";
 const functionsuName = "getSignedURL";
 const functionnbName = "createBof";
 const functionfuName = "reportsFileUploads";
-const bucketName = "sega";
-const regionName = "us-central1";
-const source_bucket = "audio-source-bof";
+const bucketName = config.functionsBucketName;
+const regionName = config.region;
+const source_bucket = config.sourceBucketName;
 
 const bucket = new gcp.storage.Bucket(`${bucketName}_bofsearch`,{
   name: `${bucketName}_bofsearch`,
@@ -18,13 +25,14 @@ const bucket = new gcp.storage.Bucket(`${bucketName}_bofsearch`,{
 
 const bucketObjecthw = new gcp.storage.BucketObject("hw-zip", {
   bucket: bucket.name,
-  source: new asset.AssetArchive({
-      ".": new asset.FileArchive("./hw-func"),
+  source: new pulumi.asset.AssetArchive({
+      ".": new pulumi.asset.FileArchive("./backend/cloud-functions/hw-func"),
   }),
 });
 
 const functionhw = new gcp.cloudfunctions.Function(functionhwName, {
   sourceArchiveBucket: bucket.name,
+  region: regionName,
   runtime: "nodejs10",
   sourceArchiveObject: bucketObjecthw.name,
   entryPoint: "helloGet",
@@ -36,13 +44,14 @@ const functionhw = new gcp.cloudfunctions.Function(functionhwName, {
 
 const bucketObjectUploadBof = new gcp.storage.BucketObject("ub-zip", {
   bucket: bucket.name,
-  source: new asset.AssetArchive({
-      ".": new asset.FileArchive("./upload-bof"),
+  source: new pulumi.asset.AssetArchive({
+      ".": new pulumi.asset.FileArchive("./backend/cloud-functions/upload-bof"),
   }),
 });
 
 const functionSignedURL = new gcp.cloudfunctions.Function(functionsuName, {
   sourceArchiveBucket: bucket.name,
+  region: regionName,
   runtime: "nodejs10",
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "getSignedUrl",
@@ -55,6 +64,7 @@ const functionSignedURL = new gcp.cloudfunctions.Function(functionsuName, {
 
 const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
   sourceArchiveBucket: bucket.name,
+  region: regionName,
   runtime: "nodejs8",
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "createNewBof",
@@ -67,6 +77,7 @@ const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
 
 const functionFileUploads = new gcp.cloudfunctions.Function(functionfuName, {
   sourceArchiveBucket: bucket.name,
+  region: regionName,
   runtime: "nodejs10",
   sourceArchiveObject: bucketObjectUploadBof.name,
   entryPoint: "reportsFileUploads",

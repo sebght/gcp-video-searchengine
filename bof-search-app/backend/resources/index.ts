@@ -1,7 +1,7 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as gcp from "@pulumi/gcp";
 
-const stackConfig = new pulumi.Config("setup");
+const stackConfig = new pulumi.Config("resources");
 const config = {
   sourceBucketName: stackConfig.require("sourceBucketName"),
   region: stackConfig.require("region")
@@ -24,4 +24,4 @@ const bucket = new gcp.storage.Bucket(config.sourceBucketName, {
 });
 
 // Export the DNS name of the bucket
-export const bucketName = bucket.url;
+export const sourceBucketName = bucket.name;

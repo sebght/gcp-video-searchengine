@@ -1,0 +1,8 @@
+config:
+  gcp:project: bof-search
+  resources:region: us-central1
+  resources:sourceBucketName: audio-source-bof
+  resources:functionsBucketName: sega
+  static-website:pathToWebsiteContents: ./client/dist
+  static-website:bucketName: pulumi.octo-bof-se.ga
+  static-website:region: us-central1
