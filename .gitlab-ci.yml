@@ -62,6 +62,11 @@ lint:front:
 
 deploy:pulumi:
   extends: .template_deploy
+  cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
+    key: cache_front
+    paths:
+      - ./bof-search-app/front/dist
+    policy: pull
   script:
     - cd bof-search-app
     - pulumi stack select sebght/bof-search-app/dev
