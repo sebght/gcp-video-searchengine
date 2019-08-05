@@ -4,6 +4,7 @@ import * as pulumi from "@pulumi/pulumi";
 const stackConfig = new pulumi.Config("resources");
 const config = {
   sourceBucketName: stackConfig.require("sourceBucketName"),
+  outputBucketName: stackConfig.require("outputBucketName"),
   region: stackConfig.require("region"),
   functionsBucketName: stackConfig.require("functionsBucketName")
 };
@@ -15,6 +16,7 @@ const functionfuName = "reportsFileUploads";
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
 const source_bucket = config.sourceBucketName;
+const output_bucket = config.outputBucketName;
 
 const bucket = new gcp.storage.Bucket(`${bucketName}_bofsearch`,{
   name: `${bucketName}_bofsearch`,
@@ -71,7 +73,8 @@ const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
   triggerHttp: true,
   name: functionnbName,
   environmentVariables: {
-    bucket: source_bucket
+    bucket_input: source_bucket,
+    bucket_output: output_bucket
   }
 });
 
