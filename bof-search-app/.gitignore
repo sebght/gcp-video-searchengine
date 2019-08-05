@@ -3,15 +3,23 @@
 .AppleDouble
 .LSOverride
 
-# Use of JetBrains IDEs
-*.idea
-
+### Node ###
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+lerna-debug.log*
+
+# Ignoring Cloud Endpoints config for now
+backend/cloud-functions/openapi-functions.yaml
+
+# JetBrains IDE folders
+.idea
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Runtime data
 pids
@@ -24,6 +32,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+*.lcov
 
 # nyc test coverage
 .nyc_output
@@ -47,6 +56,9 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 
+# TypeScript cache
+*.tsbuildinfo
+
 # Optional npm cache directory
 .npm
 
@@ -64,6 +76,7 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -83,5 +96,7 @@ typings/
 # FuseBox cache
 .fusebox/
 
-#DynamoDB Local files 
-.dynamodb/ 
+# DynamoDB Local files
+.dynamodb/
+
+# End of https://www.gitignore.io/api/node

@@ -4,7 +4,7 @@
     policy: pull
     key: cache_front
     paths:
-      - ./bof-search-app/front/node_modules
+      - ./bof-search-app/client/node_modules
   when: on_success # Condition d'exécution : sera exécuté uniquement si les jobs de l'étape précédente réussissent
   # except:
   #   - tags

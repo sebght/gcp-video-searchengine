@@ -1,0 +1,21 @@
+{
+    "name": "gcp-typescript",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@gitlab.com/octo-cna/stage-bof-search.git"
+    },
+    "author": "SEGA",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://gitlab.com/octo-cna/stage-bof-search/issues"
+    },
+    "homepage": "https://gitlab.com/octo-cna/stage-bof-search#readme",
+    "dependencies": {
+        "@pulumi/gcp": "0.18.14",
+        "@pulumi/pulumi": "0.17.27"
+    },
+    "devDependencies": {
+        "@types/express": "4.17.0",
+        "@types/node": "12.6.8"
+    }
+}

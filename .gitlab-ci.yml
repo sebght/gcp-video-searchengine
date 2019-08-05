@@ -10,24 +10,23 @@ stages:
   - deploy
 
 include:
-  - local: '/bof-search-app/gitlab/template_build.yml'
   - local: '/bof-search-app/gitlab/template_lint_and_test.yml'
   - local: '/bof-search-app/gitlab/template_deploy.yml'
 
 build:front:
-  extends: .template_build
+  stage: build # On lie les jobs au stage de build
+  image: node:8-alpine # On utilise l’image de node 8
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
-    - echo "VUE_APP_API_URL = https://${GOOGLE_REGION}-${GCP_PROJECT_ID}.cloudfunctions.net/helloGet" > .env
     - npm install
     - npm run build
   cache: # on définit notre cache
     policy: push
     key: cache_front
     paths:
-      - ./bof-search-app/front/dist
-      - ./bof-search-app/front/node_modules
+      - ./bof-search-app/client/dist
+      - ./bof-search-app/client/node_modules
   only: # On définit une règle d'exécution : ce job sera fait uniquement sur demo ou en cas de tag
     # refs:
     #   - merge_requests
@@ -39,7 +38,7 @@ lint:front:
   extends: .template_lint_and_test
   stage: lint # On lie le job au stage de lint
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
     - npm run lint
   only:
@@ -48,11 +47,11 @@ lint:front:
     changes:
       - "bof-search-app/front/*"
 
-test:unit_front:
+.test:unit_front:
   extends: .template_lint_and_test
   stage: test # On lie le job au stage de test
   before_script:
-    - cd bof-search-app/front
+    - cd bof-search-app/client
   script: # Les scripts exécutés pendant ce job
     - npm run test:unit
   only:
@@ -61,39 +60,22 @@ test:unit_front:
     changes:
       - "bof-search-app/front/*"
 
-deploy:back:
-  extends: .template_deploy
-  script:
-    - cd bof-search-app/back
-    - pulumi stack select sebght/bof-search-app/back
-    - pulumi refresh
-    - npm i
-    - pulumi up
-  only:
-    # refs:
-    #   - merge_requests
-    changes:
-      - "bof-search-app/back/*"
-
-deploy:front:
+deploy:pulumi:
   extends: .template_deploy
   cache: # Définition des règles de cache pour récuperer les caches de l'étape de build
     key: cache_front
     paths:
-      - ./bof-search-app/front/dist
+      - ./bof-search-app/client/dist
     policy: pull
   script:
-    - cd bof-search-app/front/pulumi
-    - pulumi stack select sebght/bof-search-app/front
-    - npm i
+    - cd bof-search-app
+    - pulumi stack select sebght/bof-search-app/dev
     - pulumi refresh
-    - pulumi config set static-website:pathToWebsiteContents ../dist
-    - pulumi config set static-website:bucketName ${FRONT_BUCKET}
-    - pulumi config set static-website:region ${GOOGLE_REGION}
+    - npm i
     - pulumi up
   only:
     # refs:
     #   - merge_requests
     changes:
-      - "bof-search-app/front/*"
+      - "bof-search-app/*"
       
