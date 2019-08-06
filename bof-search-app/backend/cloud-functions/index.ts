@@ -112,7 +112,7 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functioncaName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
   runtime: "nodejs8",
-  sourceArchiveObject: bucketObjectUploadBof.name,
+  sourceArchiveObject: bucketObjectContentAnalysis.name,
   entryPoint: "convertAudioBof",
   eventTrigger: {
     eventType: "google.storage.object.finalize",
