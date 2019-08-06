@@ -4,6 +4,7 @@ import * as gcp from "@pulumi/gcp";
 const stackConfig = new pulumi.Config("resources");
 const config = {
   sourceBucketName: stackConfig.require("sourceBucketName"),
+  sourceConvBucketName: stackConfig.require("sourceConvBucketName"),
   outputBucketName: stackConfig.require("outputBucketName"),
   region: stackConfig.require("region")
 };
@@ -24,6 +25,12 @@ const sourceBucket = new gcp.storage.Bucket(config.sourceBucketName, {
     cors: cors_source
 });
 
+const sourceConvBucket = new gcp.storage.Bucket(config.sourceConvBucketName, {
+    name: config.sourceConvBucketName,
+    location: config.region,
+    cors: cors_source
+});
+
 const analysisBucket = new gcp.storage.Bucket(config.outputBucketName, {
     name: config.outputBucketName,
     location: config.region,
@@ -32,4 +39,5 @@ const analysisBucket = new gcp.storage.Bucket(config.outputBucketName, {
 
 // Export the DNS name of the bucket
 export const sourceBucketName = sourceBucket.name;
+export const sourceConvBucketName = sourceConvBucket.name;
 export const outputBucketName = analysisBucket.name;

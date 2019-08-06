@@ -15,6 +15,9 @@ lerna-debug.log*
 # Ignoring Cloud Endpoints config for now
 backend/cloud-functions/openapi-functions.yaml
 
+# Ignoring env.js file in public folder
+client/public/env.js
+
 # JetBrains IDE folders
 .idea
 

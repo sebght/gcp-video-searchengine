@@ -26,7 +26,7 @@
             class="mt-4"
             v-model="descr"
             label="Description"
-            value
+            value=""
           ></v-textarea>
 
           <v-divider class="my-2"></v-divider>
@@ -57,10 +57,11 @@
           v-model="files"
           counter
           :rules="[check_filetypes]"
-          label="File input"
+          label="Audio input"
           multiple
+          accept=".mp3,.wav"
           placeholder="Importer mes fichiers"
-          prepend-icon="mdi-file-upload"
+          prepend-icon="mdi-voice"
           outlined
           :display-size="1000"
         >
@@ -124,11 +125,7 @@ export default {
     },
     async validate() {
       if (this.$refs.form.validate()) {
-        this.firestoreDocID = await postBOF.updateDB(
-          this.title,
-          this.descr,
-          this.files
-        );
+        this.firestoreDocID = await postBOF.updateDB(this.title, this.descr);
         if (typeof this.firestoreDocID === "undefined") {
           console.log(`Petit souci sur la création de la BoF sur Firestore`);
         } else {
@@ -147,6 +144,7 @@ export default {
         // console.log(this.signedUrl);
         // console.log(this.uploadfile);
         console.log(this.firestoreDocID);
+        console.log(this.files[0].name.split(".").pop());
       }
     },
     reset() {

@@ -2,6 +2,7 @@ config:
   gcp:project: bof-search
   resources:region: us-central1
   resources:sourceBucketName: bucket-source-bof
+  resources:sourceConvBucketName: bucket-converted-bof
   resources:outputBucketName: bucket-analysis-bof
   resources:functionsBucketName: sega
   static-website:pathToWebsiteContents: ./client/dist

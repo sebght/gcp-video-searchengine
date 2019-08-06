@@ -27,17 +27,13 @@ export default {
     });
     return resp;
   },
-  async updateDB(title_bof, descr_bof, files) {
+  async updateDB(title_bof, descr_bof) {
     let respo = await axios({
       method: "post",
       url: FIRESTORE_URL,
       data: {
         title: title_bof,
-        descr: descr_bof,
-        files: files.map(file => ({
-          filetype: file.type,
-          filename: file.name
-        }))
+        descr: descr_bof
       },
       headers: {
         "Content-Type": "application/json"
