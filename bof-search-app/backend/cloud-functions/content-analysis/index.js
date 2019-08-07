@@ -16,6 +16,12 @@ function promisifyCommand(command) {
     });
 }
 
+// lazy initialisation of variables
+let encoding;
+let languageCode;
+// used-by-everyone variable
+const sampleRate = 44100 ;
+
 'use strict';
 
 /**
@@ -43,40 +49,35 @@ exports.convertAudioBof = async (data,context) => {
         return true;
     }
 
-    const audio_uri = `gs://${file.bucket}/${file.name}`;
-
     const source_bucket = storage.bucket(file.bucket);
     const output_bucket = storage.bucket(process.env.bucket_output);
 
     const fileName = path.basename(file.name);
-    console.log(fileName);
-
     const tempFilePath = path.join(os.tmpdir(), fileName);
-    console.log(tempFilePath);
-    const targetTempFileName = fileName + '_converted.wav';
+    const targetTempFileName = fileName.replace(/\.[^/.]+$/, "") + '_converted.wav';
     const targetTempFilePath = path.join(os.tmpdir(), targetTempFileName);
     const targetStorageFilePath = path.join(path.dirname(file.name), targetTempFileName);
 
     await source_bucket.file(file.name).download({destination: tempFilePath});
     console.log('Audio downloaded locally to', tempFilePath);
 
-    let command = ffmpeg(file.name)
+    let command = ffmpeg(tempFilePath)
         .setFfmpegPath(ffmpeg_static.path)
         .audioChannels(1)
-        .audioFrequency(44100)
+        .audioFrequency(sampleRate)
         .format('wav')
         .output(targetTempFilePath);
 
     await promisifyCommand(command);
     console.log('Output audio created at', targetTempFileName);
 
-    await output_bucket.upload(targetTempFilePath, {destination: targetStorageFilePath});
+    await output_bucket.upload(targetTempFilePath, {destination: targetStorageFilePath, resumable: false});
     console.log('Output audio uploaded to', targetStorageFilePath);
 
     // Once the audio has been uploaded delete the local file to free up disk space.
     fs.unlinkSync(tempFilePath);
     fs.unlinkSync(targetTempFilePath);
 
-    return console.log('Temporary files removed.', targetTempFilePath);
+    return console.log('Temporary files removed.', tempFilePath, targetTempFilePath);
 };
 
