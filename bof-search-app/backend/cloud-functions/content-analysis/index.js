@@ -136,13 +136,13 @@ exports.speechToText = async (data,context) => {
     // Get a Promise representation of the final result of the job
     const [response] = await operation.promise();
     const bofID = path.dirname(file.name);
-    const filename = `${bofID}/analysis.json`;
+    const filename = `${bofID}/analysis.txt`;
     const transcription = response.results
         .map(result => result.alternatives[0].transcript)
         .join('\n');
     console.log(`Saving gs://${process.env.bucket_output}/${filename}`);
     return output_bucket
         .file(filename)
-        .save(JSON.stringify(transcription, null, 2));
+        .save(transcription);
 };
 
