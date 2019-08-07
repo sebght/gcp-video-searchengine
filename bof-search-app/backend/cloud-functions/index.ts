@@ -108,7 +108,7 @@ const bucketObjectContentAnalysis = new gcp.storage.BucketObject("ca-zip", {
 
 // Fonction qui convertit l'audio fourni afin d'être ok pour l'analyse
 
-const functionSpeechText = new gcp.cloudfunctions.Function(functioncaName, {
+const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
   runtime: "nodejs8",
@@ -122,6 +122,22 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functioncaName, {
     bucket_output: source_converted_bucket
   },
   name: functioncaName
+});
+
+const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectContentAnalysis.name,
+  entryPoint: "speechToText",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: source_converted_bucket
+  },
+  environmentVariables: {
+    bucket_output: output_bucket
+  },
+  name: functionsttName
 });
 
 export let helloGetEndpoint = functionhw.httpsTriggerUrl;

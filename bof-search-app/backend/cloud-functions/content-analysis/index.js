@@ -6,6 +6,7 @@ const storage = new Storage();
 const nl = require('@google-cloud/language');
 const client_nl = new nl.LanguageServiceClient();
 const speech = require('@google-cloud/speech');
+const client_speech = new speech.SpeechClient();
 const ffmpeg_static = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 
@@ -26,7 +27,7 @@ const sampleRate = 44100 ;
 
 /**
  * Background Cloud Function to be triggered by Cloud Storage.
- * Transcripts the audio file uploaded.
+ * Converts the audio to optimized format for transcription
  *
  * @param {object} data The event payload.
  * @param {object} context The event metadata.
@@ -79,5 +80,69 @@ exports.convertAudioBof = async (data,context) => {
     fs.unlinkSync(targetTempFilePath);
 
     return console.log('Temporary files removed.', tempFilePath, targetTempFilePath);
+};
+
+/**
+ * Background Cloud Function to be triggered by Cloud Storage.
+ * Transcripts the audio file uploaded.
+ *
+ * @param {object} data The event payload.
+ * @param {object} context The event metadata.
+ */
+exports.speechToText = async (data,context) => {
+    const file = data;
+    encoding = 'LINEAR16';
+    languageCode = 'fr-FR';
+
+    if (file.resourceState === 'not_exists') {
+        console.log(`File ${file.name} deleted.`);
+        return true;
+    } else if (file.metageneration === '1') {
+        // metageneration attribute is updated on metadata changes.
+        // on create value is 1
+        console.log(`File ${file.name} uploaded.`);
+    } else {
+        console.log(`File ${file.name} metadata updated.`);
+    }
+    if (!new RegExp(/\.(wav)/g).test(file.name)) {
+        // Ignore changes to non-audio files
+        console.log(`File ${file.name} is not a .wav file`);
+        return true;
+    }
+
+    const audio_uri = `gs://${file.bucket}/${file.name}`
+
+    console.log('Analyzing ' + audio_uri);
+
+    const converted_bucket = storage.bucket(file.bucket);
+    const output_bucket = storage.bucket(process.env.bucket_output);
+    const audio = {
+        uri: audio_uri
+    };
+
+    // Configure audio settings for BoF recordings
+    const audioConfig = {
+        encoding: encoding,
+        sampleRateHertz: sampleRate,
+        languageCode: languageCode
+    };
+
+    const request = {
+        audio: audio,
+        config: audioConfig,
+    };
+
+    const [operation] = await client_speech.longRunningRecognize(request);
+    // Get a Promise representation of the final result of the job
+    const [response] = await operation.promise();
+    const bofID = path.dirname(file.name);
+    const filename = `${bofID}/analysis.json`;
+    const transcription = response.results
+        .map(result => result.alternatives[0].transcript)
+        .join('\n');
+    console.log(`Saving gs://${process.env.bucket_output}/${filename}`);
+    return output_bucket
+        .file(filename)
+        .save(JSON.stringify(transcription, null, 2));
 };
 
