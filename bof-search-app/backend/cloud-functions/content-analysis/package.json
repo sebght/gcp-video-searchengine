@@ -3,10 +3,12 @@
   "author": "SEGA",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/firestore": "2.2.7",
     "@google-cloud/language": "3.2.6",
     "@google-cloud/speech": "3.2.5",
     "@google-cloud/storage": "3.0.4",
     "ffmpeg-static": "2.5.0",
+    "firebase-admin": "8.3.0",
     "fluent-ffmpeg": "2.1.2"
   }
 }

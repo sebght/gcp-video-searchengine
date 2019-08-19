@@ -3,6 +3,9 @@ const fs = require('fs');
 const os = require('os');
 const {Storage} = require('@google-cloud/storage');
 const storage = new Storage();
+const Firestore = require('@google-cloud/firestore');
+const db = new Firestore();
+const admin = require('firebase-admin');
 const nl = require('@google-cloud/language');
 const client_nl = new nl.LanguageServiceClient();
 const speech = require('@google-cloud/speech');
@@ -19,7 +22,8 @@ function promisifyCommand(command) {
 
 // lazy initialisation of variables
 let encoding;
-let languageCode;
+let primaryLanguageCode;
+let secondaryLanguageCode;
 // used-by-everyone variable
 const sampleRate = 44100 ;
 
@@ -92,7 +96,8 @@ exports.convertAudioBof = async (data,context) => {
 exports.speechToText = async (data,context) => {
     const file = data;
     encoding = 'LINEAR16';
-    languageCode = 'fr-FR';
+    primaryLanguageCode = 'fr-FR';
+    secondaryLanguageCode = 'en-US';
 
     if (file.resourceState === 'not_exists') {
         console.log(`File ${file.name} deleted.`);
@@ -121,10 +126,16 @@ exports.speechToText = async (data,context) => {
     };
 
     // Configure audio settings for BoF recordings
+    const phrases = fs.readFileSync('tech_glossary.txt').toString().split("\n");
     const audioConfig = {
         encoding: encoding,
         sampleRateHertz: sampleRate,
-        languageCode: languageCode
+        languageCode: primaryLanguageCode,
+        alternativeLanguageCodes: [primaryLanguageCode, secondaryLanguageCode],
+        speechContexts: [{
+        "phrases": phrases,
+        "boost": 20
+        }]
     };
 
     const request = {
@@ -144,5 +155,74 @@ exports.speechToText = async (data,context) => {
     return output_bucket
         .file(filename)
         .save(transcription);
+};
+
+/**
+ * Background Cloud Function to be triggered by Cloud Storage.
+ * Transcripts the audio file uploaded.
+ *
+ * @param {object} data The event payload.
+ * @param {object} context The event metadata.
+ */
+exports.getKeywords = async (data,context) => {
+    const file = data;
+    primaryLanguageCode = 'fr';
+
+    if (file.resourceState === 'not_exists') {
+        console.log(`File ${file.name} deleted.`);
+        return true;
+    } else if (file.metageneration === '1') {
+        // metageneration attribute is updated on metadata changes.
+        // on create value is 1
+        console.log(`File ${file.name} uploaded.`);
+    } else {
+        console.log(`File ${file.name} metadata updated.`);
+        return true;
+    }
+    if (path.basename(file.name) !== 'analysis.txt' ) {
+        // Ignore changes to non-audio files
+        console.log(`File ${file.name} is already processed by Natural Language`);
+        return true;
+    }
+    const document = {
+        gcsContentUri: `gs://${file.bucket}/${file.name}`,
+        type: 'PLAIN_TEXT',
+        language: primaryLanguageCode
+    };
+
+    // Detects entities in the document
+    const [result] = await client_nl.analyzeEntities({document});
+    const entities = result.entities;
+    var result_final = [];
+    entities.reduce(function(res, value) {
+        if (!res[value.name]) {
+            res[value.name] = { name: value.name, salience: 0, count: 0, mean_salience: 0, mentions: 0 };
+            result_final.push(res[value.name]);
+        }
+        res[value.name].mentions += value.mentions.length;
+        res[value.name].count += 1;
+        res[value.name].salience += value.salience;
+        res[value.name].mean_salience = Number((res[value.name].salience / res[value.name].count).toFixed(2));
+        return res;
+    }, {});
+    const min_mentions = 3;
+    const myFilteredData = result_final.filter(function(obj) {
+        return obj.salience > 0.01 && obj.mentions >= min_mentions;
+    });
+
+    const bofID = path.dirname(file.name);
+    let docRef = db.collection("bofs").doc(bofID);
+    console.log(`Reporting in Firestore : collection "bofs" doc "${bofID}"`);
+    let setDoc = docRef.update({
+        tags: myFilteredData
+    });
+
+    const output_bucket = storage.bucket(file.bucket);
+    const filename = `${bofID}/indexes.txt`;
+    console.log(`Saving all non-filtered tags in gs://${file.bucket}/${filename}`);
+    return output_bucket
+        .file(filename)
+        .save(JSON.stringify(result_final));
+
 };
 

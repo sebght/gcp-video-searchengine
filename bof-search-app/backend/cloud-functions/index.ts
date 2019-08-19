@@ -16,6 +16,7 @@ const functionnbName = "createBof";
 const functionfuName = "reportsFileUploads";
 const functioncaName = "convertAudioBof";
 const functionsttName = "speechToText";
+const functionekwName = "getKeyWords";
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
 const source_bucket = config.sourceBucketName;
@@ -111,6 +112,7 @@ const bucketObjectContentAnalysis = new gcp.storage.BucketObject("ca-zip", {
 const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
+  availableMemoryMb: 1024,
   runtime: "nodejs8",
   sourceArchiveObject: bucketObjectContentAnalysis.name,
   entryPoint: "convertAudioBof",
@@ -124,6 +126,8 @@ const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
   name: functioncaName
 });
 
+// Fonction qui fait l'analyse Speech-To-Text sur l'audio converti
+
 const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
@@ -134,10 +138,26 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
     eventType: "google.storage.object.finalize",
     resource: source_converted_bucket
   },
+  timeout: 540,
   environmentVariables: {
     bucket_output: output_bucket
   },
   name: functionsttName
+});
+
+// Fonction qui extraie du transcript des tags
+
+const functionExtractKeys = new gcp.cloudfunctions.Function(functionekwName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectContentAnalysis.name,
+  entryPoint: "getKeywords",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: output_bucket
+  },
+  name: functionekwName
 });
 
 export let helloGetEndpoint = functionhw.httpsTriggerUrl;
