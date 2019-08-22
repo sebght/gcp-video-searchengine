@@ -1,0 +1,14 @@
+{
+  "name": "listitems",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SEGA",
+  "license": "ISC",
+  "dependencies": {
+    "@google-cloud/firestore": "^2.2.7"
+  }
+}
