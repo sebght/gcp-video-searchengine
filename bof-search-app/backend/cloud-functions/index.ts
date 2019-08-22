@@ -17,6 +17,7 @@ const functionfuName = "reportsFileUploads";
 const functioncaName = "convertAudioBof";
 const functionsttName = "speechToText";
 const functionekwName = "getKeyWords";
+const functiongbName = "getAllBofs"
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
 const source_bucket = config.sourceBucketName;
@@ -160,6 +161,24 @@ const functionExtractKeys = new gcp.cloudfunctions.Function(functionekwName, {
   name: functionekwName
 });
 
+const bucketObjectListItemsBof = new gcp.storage.BucketObject("li-zip", {
+  bucket: bucket.name,
+  source: new pulumi.asset.AssetArchive({
+    ".": new pulumi.asset.FileArchive("./backend/cloud-functions/list-items"),
+  }),
+});
+
+const functionGetBofs = new gcp.cloudfunctions.Function(functiongbName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs10",
+  sourceArchiveObject: bucketObjectListItemsBof.name,
+  entryPoint: "getAllBofs",
+  triggerHttp: true,
+  name: functiongbName
+});
+
 export let helloGetEndpoint = functionhw.httpsTriggerUrl;
 export let SignedPostEndpoint = functionSignedURL.httpsTriggerUrl;
 export let createBofEndpoint = functionCreateBof.httpsTriggerUrl;
+export let listBofEndpoint = functionGetBofs.httpsTriggerUrl;
