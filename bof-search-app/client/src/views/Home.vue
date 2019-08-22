@@ -1,13 +1,13 @@
 <template>
-  <HelloWorld />
+  <VideoList />
 </template>
 
 <script>
-import HelloWorld from "../components/HelloWorld";
+import VideoList from "../components/VideoList";
 
 export default {
   components: {
-    HelloWorld
+    VideoList
   }
 };
 </script>
