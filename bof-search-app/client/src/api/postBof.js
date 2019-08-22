@@ -1,8 +1,7 @@
+import store from "@/store";
 import axios from "axios";
-/* eslint-disable no-undef*/
-const SIGN_URL = env.SIGN_URL;
-const FIRESTORE_URL = env.FIRESTORE_URL;
-/* eslint-enable no-undef*/
+const SIGN_URL = store.state.SIGN_URL;
+const FIRESTORE_URL = store.state.FIRESTORE_URL;
 
 export default {
   async getSignedURL(id_bof, file) {
