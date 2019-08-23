@@ -28,7 +28,6 @@
 
 <script>
 import bofApi from "@/api/getInfosBof";
-import { chunk } from "@/utils/arrays";
 
 export default {
   name: "VideoList",
@@ -38,21 +37,14 @@ export default {
   data: () => ({
     videos: []
   }),
-  computed: {
-    chunkedVideos() {
-      return chunk(this.videos, 2);
-    }
-  },
   methods: {
     async fetchVideos() {
       const videos = await bofApi.getAllVideos();
       this.videos = videos;
-      console.log(this.videos);
       return videos;
     },
     storeVideo(video) {
       this.$store.commit("SET_VIDEO", video);
-      console.log(this.$store.state.currentVideo);
       this.$router.push(`/video/${video.id}`);
     }
   }
