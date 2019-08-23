@@ -2,8 +2,8 @@
   <v-app>
     <v-container>
       <v-row>
-        <v-col cols="1"></v-col>
-        <v-col cols="10">
+        <v-col cols="2"></v-col>
+        <v-col cols="8">
           <div id="videoTitle">{{ video.name }}</div>
           <bof-video
             v-bind:video="video.videoUrl"
@@ -12,7 +12,7 @@
           >
           </bof-video
         ></v-col>
-        <v-col cols="1"></v-col> </v-row></v-container
+        <v-col cols="2"></v-col> </v-row></v-container
   ></v-app>
 </template>
 
@@ -42,7 +42,6 @@ export default {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   text-align: center;
   color: #2c3e50;
-  margin-top: 20px;
   margin-bottom: 20px;
 }
 </style>
