@@ -88,14 +88,15 @@ exports.createNewBof = async (req, res) => {
   let setDoc = docRef.set({
     name: req.body.title,
     description: req.body.descr,
-    files: []
+    files: [],
+    tags: []
   });
   const bucket_input = storage.bucket(process.env.bucket_input);
   const bucket_output = storage.bucket(process.env.bucket_output);
   const pathFile = `${docRef.id}/init.json`;
-  console.log(`Creating gs://${bucket_input}/${pathFile}`);
+  console.log(`Creating gs://${bucket_input.name}/${pathFile}`);
   const result_input = await bucket_input.file(pathFile).save(JSON.stringify(docRef.id, null));
-  console.log(`Creating gs://${bucket_output}/${pathFile}`);
+  console.log(`Creating gs://${bucket_output.name}/${pathFile}`);
   const result_output = await bucket_output.file(pathFile).save(JSON.stringify(docRef.id, null));
   res.send(docRef.id);
   return [result_input,result_output];
