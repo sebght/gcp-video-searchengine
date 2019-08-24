@@ -26,13 +26,14 @@ export default {
     });
     return resp;
   },
-  async updateDB(title_bof, descr_bof) {
+  async updateDB(title_bof, descr_bof, speaker_bof) {
     let respo = await axios({
       method: "post",
       url: FIRESTORE_URL,
       data: {
         title: title_bof,
-        descr: descr_bof
+        descr: descr_bof,
+        speaker: [{name: `${speaker_bof}@octo.com`, photo: ""}]
       },
       headers: {
         "Content-Type": "application/json"
