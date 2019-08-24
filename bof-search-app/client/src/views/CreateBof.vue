@@ -1,93 +1,173 @@
 <template>
   <v-app>
-    <v-card class="ma-5">
-      <v-toolbar flat color="blue-grey" dark>
-        <v-toolbar-title>Poster une BoF</v-toolbar-title>
-      </v-toolbar>
-
-      <v-form ref="form" v-model="valid">
-        <v-card-text>
-          <v-text-field
-            v-model="title"
-            :rules="titleRules"
-            label="Titre"
-            required
-          ></v-text-field>
-
-          <v-text-field
-            v-model="quadri"
-            :counter="4"
-            :rules="quadriRules"
-            label="Quadrigramme"
-            required
-          ></v-text-field>
-
-          <v-textarea
-            class="mt-4"
-            v-model="descr"
-            label="Description"
-            value=""
-          ></v-textarea>
-
-          <v-divider class="my-2"></v-divider>
-
-          <v-item-group multiple v-model="actions">
-            <v-subheader>Je veux upload</v-subheader>
-            <p>{{ actions }}</p>
-            <v-item
-              v-for="(item, i) in filetypes"
-              :key="i"
-              v-slot:default="{ active, toggle }"
+    <v-container>
+      <v-row justify="center">
+        <v-col cols="10">
+          <v-card>
+            <v-card-title
+              class="title font-weight-regular justify-space-between"
             >
-              <v-chip
-                active-class="purple--text"
-                :input-value="active"
-                @click="toggle"
-                value="salut"
-                >{{ item }}</v-chip
-              >
-            </v-item>
-          </v-item-group>
-        </v-card-text>
+              <span>{{ currentTitle }}</span>
+              <v-avatar
+                color="primary lighten-2"
+                class="subheading white--text"
+                size="24"
+                v-text="step"
+              ></v-avatar>
+            </v-card-title>
 
-        <v-divider></v-divider>
+            <v-window v-model="step">
+              <v-window-item :value="1">
+                <v-form ref="form1" v-model="valid1">
+                  <v-card-text>
+                    <v-text-field
+                      v-model="quadri"
+                      label="Quadrigramme"
+                      :rules="quadriRules"
+                      hint="Celui du speaker"
+                      required
+                    ></v-text-field>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      depressed
+                      @click="step++"
+                      :disabled="!valid1"
+                    >
+                      Next
+                    </v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-window-item>
 
-        <v-file-input
-          class="ma-3"
-          v-model="files"
-          counter
-          :rules="[check_filetypes]"
-          label="Audio input"
-          multiple
-          accept=".mp3,.wav"
-          placeholder="Importer mes fichiers"
-          prepend-icon="mdi-voice"
-          outlined
-          :display-size="1000"
-        >
-          <template v-slot:selection="{ index, text }">
-            <v-chip v-if="index < 2" dark label small>{{ text }}</v-chip>
-            <span
-              v-else-if="index === 2"
-              class="overline grey--text text--darken-3 mx-2"
-              >+{{ files.length - 2 }} File(s)</span
-            >
-          </template>
-        </v-file-input>
+              <v-window-item :value="2">
+                <v-form ref="form2" v-model="valid2">
+                  <v-card-text>
+                    <v-text-field
+                      v-model="title"
+                      label="Titre de la BoF"
+                      :rules="titleRules"
+                      hint="Attention : pas plus de 20 caractères"
+                      required
+                    ></v-text-field>
+                    <v-textarea
+                      v-model="descr"
+                      label="Description"
+                    ></v-textarea>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn text @click="step--">
+                      Back
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      depressed
+                      @click="createBof"
+                      :disabled="!valid2"
+                    >
+                      Next
+                    </v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-window-item>
 
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" class="mr-4" @click="reset">Reset Form</v-btn>
-          <v-btn
-            :disabled="!valid"
-            color="success"
-            class="mr-4"
-            @click="validate"
-            >Post</v-btn
-          >
-        </v-card-actions>
-      </v-form>
-    </v-card>
+              <v-window-item :value="3">
+                <v-form ref="form3" v-model="valid3">
+                  <v-card-text>
+                    <v-file-input
+                      :rules="[v => !!v || 'Obligatoire']"
+                      class="ma-3"
+                      v-model="video"
+                      label="Video"
+                      accept="video/*"
+                      placeholder="Importer la vidéo source"
+                      prepend-icon="mdi-video-vintage"
+                      outlined
+                      hint="Obligatoire"
+                      persistent-hint
+                      multiple
+                    ></v-file-input>
+                    <v-file-input
+                      class="ma-3"
+                      v-model="audios"
+                      label="Audio"
+                      accept=".mp3,.wav"
+                      placeholder="Importer l'audio"
+                      prepend-icon="mdi-voice"
+                      outlined
+                      hint="Facultatif"
+                      persistent-hint
+                      multiple
+                    ></v-file-input>
+                    <v-file-input
+                      class="ma-3"
+                      v-model="slides"
+                      label="Slides"
+                      accept=".pdf"
+                      placeholder="Importer les slides"
+                      prepend-icon="mdi-file-pdf"
+                      outlined
+                      hint="Facultatif"
+                      persistent-hint
+                    ></v-file-input>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-btn text @click="step--">
+                      Back
+                    </v-btn>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                      color="primary"
+                      depressed
+                      @click="uploadFiles"
+                      :disabled="!valid3"
+                    >
+                      Next
+                    </v-btn>
+                  </v-card-actions>
+                </v-form>
+              </v-window-item>
+
+              <v-window-item :value="4">
+                <div class="pa-4 text-center">
+                  <v-img
+                    class="mb-4"
+                    contain
+                    height="128"
+                    :src="require('../assets/Avatar_Magicien.png')"
+                  ></v-img>
+                  <h3 class="title font-weight-light mb-2">
+                    La BoF a été créée
+                  </h3>
+                  <span class="caption grey--text"
+                    >Notre magicien s'occupe de tout maintenant</span
+                  >
+                </div>
+                <v-card-actions>
+                  <v-btn :disabled="step === 1" text @click="step--">
+                    Back
+                  </v-btn>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    :disabled="step === 4"
+                    color="primary"
+                    depressed
+                    @click="step++"
+                  >
+                    Next
+                  </v-btn>
+                </v-card-actions>
+              </v-window-item>
+            </v-window>
+
+            <v-divider></v-divider>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
   </v-app>
 </template>
 
@@ -96,55 +176,72 @@ import postBOF from "@/api/postBof";
 
 export default {
   data: () => ({
-    valid: true,
+    step: 1,
+    valid1: true,
+    valid2: true,
+    valid3: true,
     title: "",
     titleRules: [
       v => !!v || "Il faut un titre à la BoF",
-      v => (v && v.length <= 10) || "Name must be less than 10 characters"
+      v => (v && v.length <= 20) || "Oups, trop de caractères"
     ],
     quadri: "",
     quadriRules: [
-      v => !!v || "Donne ton quadri please",
-      v => (v && v.length <= 4) || "Un quadri a maximum 4 lettres"
+      v => !!v || "Donne ton quadri stp",
+      v => (v && v.length <= 4 && v.length >= 3) || "Un quadri a 3 ou 4 lettres"
     ],
     descr: "",
     files: [],
-    actions: [],
-    filetypes: ["Audio", "Slides", "Video"]
+    video: [],
+    audios: [],
+    slides: []
   }),
-
-  methods: {
-    check_filetypes(value) {
-      if (value.length > this.actions.length) {
-        return "Trop de fichiers";
-      } else if (value.length < this.actions.length) {
-        return "Pas assez de fichiers";
-      } else {
-        return true;
+  computed: {
+    currentTitle() {
+      switch (this.step) {
+        case 1:
+          return "Qui es-tu ?";
+        case 2:
+          return "Crée la BoF";
+        case 3:
+          return "Ajoute les fichiers";
+        default:
+          return "C'est incroyable, tu l'as fait !";
       }
-    },
-    async validate() {
-      if (this.$refs.form.validate()) {
-        this.firestoreDocID = await postBOF.updateDB(this.title, this.descr);
+    }
+  },
+  methods: {
+    async createBof() {
+      if (this.$refs.form2.validate()) {
+        this.firestoreDocID = await postBOF.updateDB(
+          this.title,
+          this.descr,
+          this.quadri
+        );
         if (typeof this.firestoreDocID === "undefined") {
           console.log(`Petit souci sur la création de la BoF sur Firestore`);
         } else {
-          for (let n = 0; n < this.files.length; n++) {
-            this.signedUrl = await postBOF.getSignedURL(
-              this.firestoreDocID,
-              this.files[n]
-            );
-            this.uploadfile = await postBOF.uploadFile(
-              this.files[n],
-              this.signedUrl
-            );
-          }
+          this.step++;
         }
-        // console.log(this.files);
-        // console.log(this.signedUrl);
-        // console.log(this.uploadfile);
         console.log(this.firestoreDocID);
-        console.log(this.files[0].name.split(".").pop());
+      }
+    },
+    async uploadFiles() {
+      if (this.$refs.form3.validate()) {
+        console.log(this.video);
+        console.log(typeof this.video);
+        this.files = this.video.concat(this.audios, this.slides);
+        for (let n = 0; n < this.files.length; n++) {
+          this.signedUrl = await postBOF.getSignedURL(
+            this.firestoreDocID,
+            this.files[n]
+          );
+          this.uploadfile = await postBOF.uploadFile(
+            this.files[n],
+            this.signedUrl
+          );
+        };
+        this.step++;
       }
     },
     reset() {
