@@ -7,7 +7,16 @@
             <template v-for="(video, index) in videos">
               <v-list-item :key="video.name" @click="storeVideo(video)">
                 <v-list-item-avatar>
-                  <v-img :src="video.speaker[0].photo"></v-img>
+<!--                  <v-icon-->
+<!--                    x-large-->
+<!--                    v-if="video.speaker[0].photo === ''"-->
+<!--                    >mdi-account-circle</v-icon-->
+<!--                  >-->
+                  <v-img
+                    v-if="video.speaker[0].photo === ''"
+                    :src="require('../assets/Avatar_Mario.png')"
+                  ></v-img>
+                  <v-img v-else :src="video.speaker[0].photo"></v-img>
                 </v-list-item-avatar>
 
                 <v-list-item-content>
@@ -18,9 +27,16 @@
                 </v-list-item-content>
                 <v-spacer></v-spacer>
                 <v-img
+                  v-if="video.thumbnailUrl === ''"
+                  :src="require('../assets/Picto_Cinema.png')"
+                  max-width="100"
+                  max-height="70"
+                ></v-img>
+                <v-img
+                  v-else
                   :src="video.thumbnailUrl"
                   max-width="100"
-                  max-height="100"
+                  max-height="70"
                 ></v-img>
               </v-list-item>
               <v-divider :key="index" inset></v-divider>

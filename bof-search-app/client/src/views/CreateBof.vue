@@ -242,8 +242,6 @@ export default {
         this.loader = "loading3";
         const l = this.loader;
         this[l] = !this[l];
-        console.log(this.video);
-        console.log(typeof this.video);
         this.files = this.video.concat(this.audios, this.slides);
         for (let n = 0; n < this.files.length; n++) {
           this.signedUrl = await postBOF.getSignedURL(
