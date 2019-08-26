@@ -65,8 +65,9 @@
                     <v-btn
                       color="primary"
                       depressed
+                      :loading="loading2"
                       @click="createBof"
-                      :disabled="!valid2"
+                      :disabled="!valid2 || loading2"
                     >
                       Next
                     </v-btn>
@@ -78,7 +79,7 @@
                 <v-form ref="form3" v-model="valid3">
                   <v-card-text>
                     <v-file-input
-                      :rules="[v => !!v || 'Obligatoire']"
+                      :rules="[v => v.length === 1 || 'Obligatoire']"
                       class="ma-3"
                       v-model="video"
                       label="Video"
@@ -122,6 +123,7 @@
                     <v-btn
                       color="primary"
                       depressed
+                      :loading="loading3"
                       @click="uploadFiles"
                       :disabled="!valid3"
                     >
@@ -176,10 +178,13 @@ import postBOF from "@/api/postBof";
 
 export default {
   data: () => ({
+    loader: null,
+    loading2: false,
+    loading3: false,
     step: 1,
     valid1: true,
     valid2: true,
-    valid3: true,
+    valid3: false,
     title: "",
     titleRules: [
       v => !!v || "Il faut un titre à la BoF",
@@ -213,21 +218,30 @@ export default {
   methods: {
     async createBof() {
       if (this.$refs.form2.validate()) {
+        this.loader = "loading2";
+        const l = this.loader;
+        this[l] = !this[l];
         this.firestoreDocID = await postBOF.updateDB(
           this.title,
           this.descr,
           this.quadri
         );
+        this.loader = null;
+        this.loading2 = false;
         if (typeof this.firestoreDocID === "undefined") {
           console.log(`Petit souci sur la création de la BoF sur Firestore`);
         } else {
           this.step++;
         }
+        console.log(this.valid3);
         console.log(this.firestoreDocID);
       }
     },
     async uploadFiles() {
       if (this.$refs.form3.validate()) {
+        this.loader = "loading3";
+        const l = this.loader;
+        this[l] = !this[l];
         console.log(this.video);
         console.log(typeof this.video);
         this.files = this.video.concat(this.audios, this.slides);
@@ -240,7 +254,9 @@ export default {
             this.files[n],
             this.signedUrl
           );
-        };
+        }
+        this.loader = null;
+        this.loading3 = false;
         this.step++;
       }
     },
