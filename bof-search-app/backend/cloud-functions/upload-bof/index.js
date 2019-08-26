@@ -88,6 +88,7 @@ exports.createNewBof = async (req, res) => {
   let setDoc = docRef.set({
     name: req.body.title,
     description: req.body.descr,
+    speaker: req.body.speaker,
     files: [],
     tags: []
   });
@@ -126,6 +127,14 @@ exports.reportsFileUploads = (data,context) => {
         filename: file.name
       })
     });
+    if (new RegExp(/\.(m4v|avi|mpg|mp4)/g).test(file.name)) {
+      // Check if it's a video
+      console.log(`File ${file.name} is a video file`);
+      let addVideoUrl = docRef.update({
+        videoUrl: `https://storage.googleapis.com/${file.bucket}/${file.name}`,
+        thumbnailUrl: ''
+      });
+    }
   } else {
     console.log(`File ${file.name} metadata updated.`);
   }

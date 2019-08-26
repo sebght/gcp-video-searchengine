@@ -7,11 +7,12 @@ import * as gcp from "@pulumi/gcp";
 
 console.log(`Démarrage du Big Daddy Pulumi`);
 
-const buildEnvJsFile = ([signUrlValue, firestoreUrlValue, srcBucketName]: string[]) => {
+const buildEnvJsFile = ([signUrlValue, firestoreUrlValue, getBofUrlValue, srcBucketName]: string[]) => {
     return `
 window.env = {
     SIGN_URL: '${signUrlValue}',
     FIRESTORE_URL: '${firestoreUrlValue}',
+    GET_BOF_URL: '${getBofUrlValue}',
     VIDEO_BUCKET: '${srcBucketName}'
   }`;
 };
@@ -19,7 +20,7 @@ window.env = {
 const envJs = new gcp.storage.BucketObject("env.js", {
     name: "env.js",
     bucket: siteBucketName,
-    content: pulumi.all([f.SignedPostEndpoint, f.createBofEndpoint, setup.sourceBucketName]).apply(buildEnvJsFile)
+    content: pulumi.all([f.SignedPostEndpoint, f.createBofEndpoint, f.listBofEndpoint, setup.sourceBucketName]).apply(buildEnvJsFile)
 });
 
 export const websiteUrl = siteBucketWebsiteEndpoint;

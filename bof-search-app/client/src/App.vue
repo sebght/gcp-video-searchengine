@@ -1,20 +1,33 @@
 <template>
   <v-app>
-    <v-app-bar app>
-      <v-toolbar-title class="headline text-uppercase">
-        <span><router-link to="/">Home</router-link></span>
-      </v-toolbar-title>
-      <v-spacer />
-      <v-btn text><router-link to="/create">Créer une BoF</router-link></v-btn>
-      <v-spacer />
-      <v-btn text><router-link to="/upload">Upload files</router-link></v-btn>
+    <v-app-bar app class="justify-space-around">
+      <v-btn
+        to="/"
+        exact
+        fab
+        class="mr-4"
+        exact-active-class=""
+        active-class=""
+      >
+        <v-avatar>
+          <img :src="require('./assets/logo.svg')" alt="Logo" />
+        </v-avatar>
+      </v-btn>
+      <v-btn to="/create" text link class="mr-2" active-class=""
+        >Créer une BoF</v-btn
+      >
+      <v-btn to="/upload" text active-class="">Upload files</v-btn>
       <v-spacer />
       <v-btn
-        text
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
+        href="https://github.com/sebght/gcp-video-searchengine/tree/master/bof-search-app"
         target="_blank"
+        text
+        icon
+        x-large
+        color="black"
+        active-class=""
       >
-        <span class="mr-2">Latest Release</span>
+        <v-icon>mdi-github-circle</v-icon>
       </v-btn>
     </v-app-bar>
 

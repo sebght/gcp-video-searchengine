@@ -1,8 +1,7 @@
+import store from "@/store";
 import axios from "axios";
-/* eslint-disable no-undef*/
-const SIGN_URL = env.SIGN_URL;
-const FIRESTORE_URL = env.FIRESTORE_URL;
-/* eslint-enable no-undef*/
+const SIGN_URL = store.state.SIGN_URL;
+const FIRESTORE_URL = store.state.FIRESTORE_URL;
 
 export default {
   async getSignedURL(id_bof, file) {
@@ -27,13 +26,14 @@ export default {
     });
     return resp;
   },
-  async updateDB(title_bof, descr_bof) {
+  async updateDB(title_bof, descr_bof, speaker_bof) {
     let respo = await axios({
       method: "post",
       url: FIRESTORE_URL,
       data: {
         title: title_bof,
-        descr: descr_bof
+        descr: descr_bof,
+        speaker: [{ name: `${speaker_bof}@octo.com`, photo: "" }]
       },
       headers: {
         "Content-Type": "application/json"

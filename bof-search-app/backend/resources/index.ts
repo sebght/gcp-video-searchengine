@@ -16,13 +16,19 @@ const cors_source = [
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       maxAgeSeconds: 3600
     }
-]
+];
 
 // Create a GCP resource (Storage Bucket)
 const sourceBucket = new gcp.storage.Bucket(config.sourceBucketName, {
     name: config.sourceBucketName,
     location: config.region,
     cors: cors_source
+});
+
+const bindingSource = new gcp.storage.BucketIAMBinding("memberSource", {
+    bucket: sourceBucket.name,
+    members: ["allUsers"],
+    role: "roles/storage.objectViewer",
 });
 
 const sourceConvBucket = new gcp.storage.Bucket(config.sourceConvBucketName, {
