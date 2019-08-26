@@ -33,7 +33,7 @@ export default {
       data: {
         title: title_bof,
         descr: descr_bof,
-        speaker: [{name: `${speaker_bof}@octo.com`, photo: ""}]
+        speaker: [{ name: `${speaker_bof}@octo.com`, photo: "" }]
       },
       headers: {
         "Content-Type": "application/json"
