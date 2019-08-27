@@ -5,6 +5,7 @@
         <v-col cols="2"></v-col>
         <v-col cols="8">
           <div id="videoTitle">{{ video.name }}</div>
+          <div id="videoDescr">{{ video.description }}</div>
           <bof-video
             v-bind:video="video.videoUrl"
             v-bind:poster="video.thumbnailUrl"
@@ -39,6 +40,13 @@ export default {
 </script>
 <style>
 #videoTitle {
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  font-weight: bold;
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+#videoDescr {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   text-align: center;
   color: #2c3e50;

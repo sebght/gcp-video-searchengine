@@ -1,0 +1,14 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "description": "Initialize the BoF Search App with some content",
+  "main": "initDB.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "2.2.4"
+  },
+  "author": "SEGA",
+  "license": "ISC"
+}
