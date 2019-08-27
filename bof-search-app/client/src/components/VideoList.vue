@@ -7,11 +7,6 @@
             <template v-for="(video, index) in videos">
               <v-list-item :key="video.name" @click="storeVideo(video)">
                 <v-list-item-avatar>
-<!--                  <v-icon-->
-<!--                    x-large-->
-<!--                    v-if="video.speaker[0].photo === ''"-->
-<!--                    >mdi-account-circle</v-icon-->
-<!--                  >-->
                   <v-img
                     v-if="video.speaker[0].photo === ''"
                     :src="require('../assets/Avatar_Mario.png')"
