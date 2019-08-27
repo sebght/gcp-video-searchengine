@@ -1,0 +1,104 @@
+{
+  "bof1": {
+    "description": "Kubernetes the easy way, votre kit de démarrage sur kubernetes. Venez vous faciliter la vie.",
+    "name": "L'Ecole de l'Ops : Kubernetes kit de demarrage",
+    "speaker": [
+      {
+        "name": "cypa@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/922/big/CINE7409.jpg?1521639427"
+      },
+      {
+        "name": "aub@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/758/big/_INE0314.jpg?1506723434"
+      }
+    ],
+    "tags": [],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125d09f2212009eey3sabmwhmlh9u/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/lecole-de-lops-kubernetes-kit-de-demarra_8a6d/lecole-de-lops-kubernetes-kit-de-demarra_high.mp4"
+  },
+  "bof2": {
+    "description": "",
+    "name": "Evolutionary database design",
+    "speaker": [
+      {
+        "name": "joro@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
+      }
+    ],
+    "tags": [],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff28ce5aft89kkndj3ovbaxh0/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/evolutionary-database-design-easycast-a2_125cff27af8d75f4/evolutionary-database-design-easycast-a2_high.mp4"
+  },
+  "bof3": {
+    "description": "Vous avez votre image Docker, mais ne savez pas comment la mettre en production ? Cette BoF est parfaite pour vous ! Elle vous permettra de repartir avec des bases d'infra, et du code vous permettant de monter une infrastructure simplement et rapidement pour faire tourner cette image !",
+    "name": "L'ecole de l'ops : faire rapidement tourner une image Docker sur un environnement prod ready",
+    "speaker": [
+      {
+        "name": "arp@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/800/big/CINE4708_%281%29.jpg?1516353858"
+      },
+      {
+        "name": "cypa@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/922/big/CINE7409.jpg?1521639427"
+      }
+    ],
+    "tags": [],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff287547kni1nyjdvamzr4z2d/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/lecole-de-lops-faire-rapidement-tourner-_125cff27aa633387/lecole-de-lops-faire-rapidement-tourner-_high.mp4"
+  },
+  "bof4": {
+    "description": "Comment faire de la reconnaissance d'image avec un réseau de neurones, AWS et une raspberry accompagnée de sa caméra (<50€)",
+    "name": "Deep learning embarqué",
+    "speaker": [
+      {
+        "name": "pade@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/1242/big/HUBC2006.jpg?1548162609"
+      },
+      {
+        "name": "cob@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/570/big/CINE1624.jpg?1482163255"
+      },
+      {
+        "name": "sar@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/607/big/CINE3086.jpg?1484571772"
+      }
+    ],
+    "tags": [],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff284dc3k8y641qzhqvt8d380/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/deep-learning-embarque-easycast-a201-16-_125cff27aa168db9/deep-learning-embarque-easycast-a201-16-_high.mp4"
+  },
+  "bof5": {
+    "description": "Partage de clés intéressantes issues de l'analyse transactionnelle pour reconnaître et déjouer les conflits en missions ou dans la vie de tous les jours",
+    "name": "Les jeux psychologiques en analyse transactionnelle",
+    "speaker": [
+      {
+        "name": "sam@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/190/big/OCTO_5_Accessoire_RVB.jpg?1530696131"
+      }
+    ],
+    "tags": [],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff2824db6nynzksjtqgvsm9y5/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/les-jeux-psychologiques-en-analyse-trans_125cff27a9d19102/les-jeux-psychologiques-en-analyse-trans_high.mp4"
+  },
+  "bof6": {
+    "description": "Git est un outil pour travailler en équipe au quotidien, mais aussi un musée qui conserve l’historique d’un projet. \nAvec de bons outils, on peut en tirer beaucoup de choses : qui a contribué, quelle est la dynamique du projet, quelles sont les features qui ont posé le plus de problèmes ? \nDurant cette BOF nous allons analyser l’historique d’un dinosaure : EISMO. Par des analyses avec un notebook, code-maat et gitanalysis, nous verrons comment en tirer l’essence, et le rendre activable.",
+    "name": "Que nous apprennent 10 ans de commits GIT ?",
+    "speaker": [
+      {
+        "name": "far@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/293/big/photo.jpg?1378277856"
+      },
+      {
+        "name": "joro@octo.com",
+        "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
+      }
+    ],
+    "tags": [
+      { "name": "projet" }, { "name": "coup" }, { "name": "fois" }, { "name": "guide" }, { "name": "clients" }, { "name": "entretien" }, { "name": "diffusion" },
+      { "name": "côté" }, { "name": "Joseph" }, { "name": "Canal+" }, { "name": "choses" }, { "name": "fait" }, { "name": "log" }, { "name": "nombre" },
+      { "name": "équipe" }, { "name": "fichier" }, { "name": "fichiers" }
+    ],
+    "thumbnailUrl": "https://tv.octo.com/public/videos/v125cf1fc7423w1w7owy90kgt3mc7e/thumb_catalog.jpg",
+    "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/que-nous-apprennent-10-ans-de-commits-gi_125cf1fc26c173f7/que-nous-apprennent-10-ans-de-commits-gi_high.mp4"
+  }
+}
