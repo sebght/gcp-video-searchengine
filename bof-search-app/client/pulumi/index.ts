@@ -17,7 +17,7 @@ const config = {
 };
 
 // contentBucket is the S3 bucket that the website's contents will be stored in.
-const siteBucket = new gcp.storage.Bucket(config.bucketName, {
+export const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   name: config.bucketName,
   location: config.region,
   bucketPolicyOnly: true,
