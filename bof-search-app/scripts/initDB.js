@@ -6,6 +6,7 @@ for(const bofKey in content) {
     console.log(bofKey+": "+content[bofKey].name);
     let docRef = db.collection("bofs").doc();
     let setDoc = docRef.set({
+        id: docRef.id,
         name: content[bofKey].name,
         description: content[bofKey].description,
         speaker: content[bofKey].speaker,
