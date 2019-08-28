@@ -28,6 +28,7 @@ exports.getAllBofs = async (req, res) => {
     let allBofs = await bofsRef.get();
     allBofs.forEach(doc => {
         videos.push(doc.data());
+        videos.push(doc.id);
     });
     res.send(videos)
 };
