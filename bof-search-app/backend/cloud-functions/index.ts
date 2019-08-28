@@ -15,6 +15,7 @@ const functionsuName = "getSignedURL";
 const functionnbName = "createBof";
 const functionfuName = "reportsFileUploads";
 const functioncaName = "convertAudioBof";
+const functionvttName = "slidesToText";
 const functionsttName = "speechToText";
 const functionekwName = "getKeyWords";
 const functiongbName = "getAllBofs"
@@ -125,6 +126,24 @@ const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
     bucket_output: source_converted_bucket
   },
   name: functioncaName
+});
+
+// Fonction qui fait l'analyse Vision-To-Text sur le pdf des slides
+
+const functionVisionText = new gcp.cloudfunctions.Function(functionvttName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectContentAnalysis.name,
+  entryPoint: "slidesToText",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: source_bucket
+  },
+  environmentVariables: {
+    bucket_output: output_bucket
+  },
+  name: functionvttName
 });
 
 // Fonction qui fait l'analyse Speech-To-Text sur l'audio converti
