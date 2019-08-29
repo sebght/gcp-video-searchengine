@@ -12,7 +12,8 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/758/big/_INE0314.jpg?1506723434"
       }
     ],
-    "tags": [],
+    "audio_tags": [],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125d09f2212009eey3sabmwhmlh9u/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/lecole-de-lops-kubernetes-kit-de-demarra_8a6d/lecole-de-lops-kubernetes-kit-de-demarra_high.mp4"
   },
@@ -25,7 +26,8 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
       }
     ],
-    "tags": [],
+    "audio_tags": [],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff28ce5aft89kkndj3ovbaxh0/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/evolutionary-database-design-easycast-a2_125cff27af8d75f4/evolutionary-database-design-easycast-a2_high.mp4"
   },
@@ -42,7 +44,8 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/922/big/CINE7409.jpg?1521639427"
       }
     ],
-    "tags": [],
+    "audio_tags": [],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff287547kni1nyjdvamzr4z2d/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/lecole-de-lops-faire-rapidement-tourner-_125cff27aa633387/lecole-de-lops-faire-rapidement-tourner-_high.mp4"
   },
@@ -63,7 +66,8 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/607/big/CINE3086.jpg?1484571772"
       }
     ],
-    "tags": [],
+    "audio_tags": [],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff284dc3k8y641qzhqvt8d380/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/deep-learning-embarque-easycast-a201-16-_125cff27aa168db9/deep-learning-embarque-easycast-a201-16-_high.mp4"
   },
@@ -76,7 +80,8 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/190/big/OCTO_5_Accessoire_RVB.jpg?1530696131"
       }
     ],
-    "tags": [],
+    "audio_tags": [],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125cff2824db6nynzksjtqgvsm9y5/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/les-jeux-psychologiques-en-analyse-trans_125cff27a9d19102/les-jeux-psychologiques-en-analyse-trans_high.mp4"
   },
@@ -93,11 +98,12 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
       }
     ],
-    "tags": [
+    "audio_tags": [
       { "name": "projet" }, { "name": "coup" }, { "name": "fois" }, { "name": "guide" }, { "name": "clients" }, { "name": "entretien" }, { "name": "diffusion" },
       { "name": "côté" }, { "name": "Joseph" }, { "name": "Canal+" }, { "name": "choses" }, { "name": "fait" }, { "name": "log" }, { "name": "nombre" },
       { "name": "équipe" }, { "name": "fichier" }, { "name": "fichiers" }
     ],
+    "slides_tags": [],
     "thumbnailUrl": "https://tv.octo.com/public/videos/v125cf1fc7423w1w7owy90kgt3mc7e/thumb_catalog.jpg",
     "videoUrl": "https://d2u3lzih3uhb7x.cloudfront.net/octo/que-nous-apprennent-10-ans-de-commits-gi_125cf1fc26c173f7/que-nous-apprennent-10-ans-de-commits-gi_high.mp4"
   }
