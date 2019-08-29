@@ -10,8 +10,6 @@ const nl = require('@google-cloud/language');
 const client_nl = new nl.LanguageServiceClient();
 const speech = require('@google-cloud/speech');
 const client_speech = new speech.SpeechClient();
-const vision = require('@google-cloud/vision');
-const client_vision = new vision.ImageAnnotatorClient();
 const ffmpeg_static = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 
@@ -86,63 +84,6 @@ exports.convertAudioBof = async (data,context) => {
     fs.unlinkSync(targetTempFilePath);
 
     return console.log('Temporary files removed.', tempFilePath, targetTempFilePath);
-};
-
-/**
- * Background Cloud Function to be triggered by Cloud Storage.
- * Transcripts the pdf file uploaded.
- *
- * @param {object} data The event payload.
- * @param {object} context The event metadata.
- */
-exports.slidesToText = async (data,context) => {
-    const file = data;
-    if (file.resourceState === 'not_exists') {
-        console.log(`File ${file.name} deleted.`);
-        return true;
-    } else if (file.metageneration === '1') {
-        // metageneration attribute is updated on metadata changes.
-        // on create value is 1
-        console.log(`File ${file.name} uploaded.`);
-    } else {
-        console.log(`File ${file.name} metadata updated.`);
-    }
-    if (!new RegExp(/\.(pdf)/g).test(file.name)) {
-        // Ignore changes to non-pdf files
-        console.log(`File ${file.name} is not a .pdf file`);
-        return true;
-    }
-
-    const gcsSourceUri = `gs://${file.bucket}/${file.name}`;
-    const gcsDestinationUri = `gs://${process.env.bucket_output}/${file.name}/`;
-
-    const inputConfig = {
-        mimeType: 'application/pdf',
-        gcsSource: {
-            uri: gcsSourceUri,
-        },
-    };
-    const outputConfig = {
-        gcsDestination: {
-            uri: gcsDestinationUri,
-        },
-    };
-    const features = [{type: 'DOCUMENT_TEXT_DETECTION'}];
-    const request = {
-        requests: [
-            {
-                inputConfig: inputConfig,
-                features: features,
-                outputConfig: outputConfig,
-            },
-        ],
-    };
-
-    const [operation] = await client_vision.asyncBatchAnnotateFiles(request);
-    const [filesResponse] = await operation.promise();
-    const destinationUri =
-        filesResponse.responses[0].outputConfig.gcsDestination.uri;
-    console.log('Json saved to: ' + destinationUri);
 };
 
 /**
