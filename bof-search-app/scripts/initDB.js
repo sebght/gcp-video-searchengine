@@ -12,6 +12,7 @@ for(const bofKey in content) {
         speaker: content[bofKey].speaker,
         thumbnailUrl: content[bofKey].thumbnailUrl,
         videoUrl: content[bofKey].videoUrl,
-        tags: content[bofKey].tags
+        audio_tags: content[bofKey].audio_tags,
+        slides_tags: content[bofKey].slides_tags
     });
 }

@@ -91,7 +91,8 @@ exports.createNewBof = async (req, res) => {
     description: req.body.descr,
     speaker: req.body.speaker,
     files: [],
-    tags: []
+    audio_tags: [],
+    slides_tags: []
   });
   const bucket_input = storage.bucket(process.env.bucket_input);
   const bucket_output = storage.bucket(process.env.bucket_output);

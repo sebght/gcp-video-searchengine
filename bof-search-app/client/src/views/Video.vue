@@ -9,7 +9,8 @@
           <bof-video
             v-bind:video="video.videoUrl"
             v-bind:poster="video.thumbnailUrl"
-            v-bind:tags="video.tags"
+            v-bind:audio_tags="video.audio_tags"
+            v-bind:slides_tags="video.slides_tags"
           >
           </bof-video
         ></v-col>
