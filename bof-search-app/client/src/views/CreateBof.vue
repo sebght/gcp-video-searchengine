@@ -148,20 +148,6 @@
                     >Notre magicien s'occupe de tout maintenant</span
                   >
                 </div>
-                <v-card-actions>
-                  <v-btn :disabled="step === 1" text @click="step--">
-                    Back
-                  </v-btn>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    :disabled="step === 4"
-                    color="primary"
-                    depressed
-                    @click="step++"
-                  >
-                    Next
-                  </v-btn>
-                </v-card-actions>
               </v-window-item>
             </v-window>
 
@@ -233,7 +219,6 @@ export default {
         } else {
           this.step++;
         }
-        console.log(this.valid3);
         console.log(this.firestoreDocID);
       }
     },
