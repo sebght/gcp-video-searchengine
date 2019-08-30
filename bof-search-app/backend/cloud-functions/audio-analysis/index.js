@@ -164,7 +164,7 @@ exports.speechToText = async (data,context) => {
  * @param {object} data The event payload.
  * @param {object} context The event metadata.
  */
-exports.getKeywords = async (data,context) => {
+exports.getKeywordsAudio = async (data,context) => {
     const file = data;
     primaryLanguageCode = 'fr';
 
