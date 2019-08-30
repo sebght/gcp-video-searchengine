@@ -17,7 +17,8 @@ const functioncaName = "convertAudioBof";
 const functionvttName = "slidesToText";
 const functionclnName = "slideAnalysisCleaning";
 const functionsttName = "speechToText";
-const functionekwName = "getKeyWords";
+const functionekwName = "getKeyWordsAudio";
+const functionekwsName = "getKeyWordsSlides";
 const functiongbName = "getAllBofs";
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
@@ -142,14 +143,14 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
   parent: bucketObjectAudioAnalysis
 });
 
-// Fonction qui extraie du transcript des tags
+// Fonction qui extraie du transcript de l'audio des tags
 
-const functionExtractKeys = new gcp.cloudfunctions.Function(functionekwName, {
+const functionExtractKeysAudio = new gcp.cloudfunctions.Function(functionekwName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
   runtime: "nodejs8",
   sourceArchiveObject: bucketObjectAudioAnalysis.name,
-  entryPoint: "getKeywords",
+  entryPoint: "getKeywordsAudio",
   eventTrigger: {
     eventType: "google.storage.object.finalize",
     resource: output_bucket
@@ -202,6 +203,23 @@ const functionCleanSlidesToText = new gcp.cloudfunctions.Function(functionclnNam
     resource: output_bucket
   },
   name: functionclnName
+}, {
+  parent: bucketObjectSlideAnalysis
+});
+
+// Fonction qui extraie du transcript de l'audio des tags
+
+const functionExtractKeysSlides = new gcp.cloudfunctions.Function(functionekwsName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectSlideAnalysis.name,
+  entryPoint: "getKeywordsSlides",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: output_bucket
+  },
+  name: functionekwsName
 }, {
   parent: bucketObjectSlideAnalysis
 });
