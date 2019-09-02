@@ -8,16 +8,34 @@
       </vue-plyr>
       <v-divider class="mx-4"></v-divider>
       <v-card-text>
-        <span class="subheading">Tags</span>
+        <span class="subheading">Tags from Audio</span>
         <v-chip-group
+          v-if="audio_tags.length > 0"
           v-model="selection"
           active-class="deep-purple accent-4 white--text"
         >
-          <v-chip v-for="(tag, i) in tags" :key="i">
+          <v-chip v-for="(audio_tag, i) in audio_tags" :key="i">
             <v-icon left>mdi-pound</v-icon>
-            {{ tag.name }}</v-chip
+            {{ audio_tag.name }}</v-chip
           >
         </v-chip-group>
+        <template v-else
+          ><v-card-text>None</v-card-text></template
+        >
+        <span class="subheading">Tags from Slides</span>
+        <v-chip-group
+          v-if="slides_tags.length > 0"
+          v-model="selection"
+          active-class="deep-purple accent-4 white--text"
+        >
+          <v-chip v-for="(slides_tag, i) in slides_tags" :key="i">
+            <v-icon left>mdi-pound</v-icon>
+            {{ slides_tag.name }}</v-chip
+          >
+        </v-chip-group>
+        <template v-else
+          ><v-card-text>None</v-card-text></template
+        >
       </v-card-text>
     </v-card>
   </v-app>
@@ -42,7 +60,11 @@ export default {
       type: String,
       required: true
     },
-    tags: {
+    audio_tags: {
+      type: Array,
+      required: true
+    },
+    slides_tags: {
       type: Array,
       required: true
     }

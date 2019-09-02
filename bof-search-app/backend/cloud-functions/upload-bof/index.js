@@ -86,11 +86,13 @@ exports.createNewBof = async (req, res) => {
   let docRef = db.collection("bofs").doc();
   console.log(`Created a new document with id : ${docRef.id}`);
   let setDoc = docRef.set({
+    id: docRef.id,
     name: req.body.title,
     description: req.body.descr,
     speaker: req.body.speaker,
     files: [],
-    tags: []
+    audio_tags: [],
+    slides_tags: []
   });
   const bucket_input = storage.bucket(process.env.bucket_input);
   const bucket_output = storage.bucket(process.env.bucket_output);

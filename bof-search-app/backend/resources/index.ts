@@ -29,6 +29,8 @@ const bindingSource = new gcp.storage.BucketIAMBinding("memberSource", {
     bucket: sourceBucket.name,
     members: ["allUsers"],
     role: "roles/storage.objectViewer",
+}, {
+    parent: sourceBucket
 });
 
 const sourceConvBucket = new gcp.storage.Bucket(config.sourceConvBucketName, {

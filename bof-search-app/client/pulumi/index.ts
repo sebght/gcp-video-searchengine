@@ -17,7 +17,7 @@ const config = {
 };
 
 // contentBucket is the S3 bucket that the website's contents will be stored in.
-const siteBucket = new gcp.storage.Bucket(config.bucketName, {
+export const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   name: config.bucketName,
   location: config.region,
   bucketPolicyOnly: true,
@@ -28,11 +28,17 @@ const siteBucket = new gcp.storage.Bucket(config.bucketName, {
   ]
 });
 
-const binding = new gcp.storage.BucketIAMBinding("member", {
-  bucket: siteBucket.name,
-  members: ["allUsers"],
-  role: "roles/storage.objectViewer",
-});
+const binding = new gcp.storage.BucketIAMBinding(
+  "member",
+  {
+    bucket: siteBucket.name,
+    members: ["allUsers"],
+    role: "roles/storage.objectViewer"
+  },
+  {
+    parent: siteBucket
+  }
+);
 
 // crawlDirectory recursive crawls the provided directory, applying the provided function
 // to every file it contains. Doesn't handle cycles from symlinks.
@@ -64,7 +70,7 @@ crawlDirectory(webContentsRootPath, (filePath: string) => {
       bucket: siteBucket.name,
       contentType: mime.getType(filePath) || undefined,
       name: relativeFilePath,
-      source: filePath,
+      source: filePath
     },
     {
       parent: siteBucket
@@ -73,4 +79,6 @@ crawlDirectory(webContentsRootPath, (filePath: string) => {
 });
 
 export const siteBucketName = siteBucket.name;
-export const siteBucketWebsiteEndpoint = siteBucket.name.apply(u => `${u}.storage.googleapis.com`);
+export const siteBucketWebsiteEndpoint = siteBucket.name.apply(
+  u => `${u}.storage.googleapis.com`
+);

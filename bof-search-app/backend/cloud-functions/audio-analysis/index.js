@@ -164,7 +164,7 @@ exports.speechToText = async (data,context) => {
  * @param {object} data The event payload.
  * @param {object} context The event metadata.
  */
-exports.getKeywords = async (data,context) => {
+exports.getKeywordsAudio = async (data,context) => {
     const file = data;
     primaryLanguageCode = 'fr';
 
@@ -214,7 +214,7 @@ exports.getKeywords = async (data,context) => {
     let docRef = db.collection("bofs").doc(bofID);
     console.log(`Reporting in Firestore : collection "bofs" doc "${bofID}"`);
     let setDoc = docRef.update({
-        tags: myFilteredData
+        audio_tags: myFilteredData
     });
 
     const output_bucket = storage.bucket(file.bucket);

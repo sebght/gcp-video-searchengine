@@ -1,5 +1,5 @@
 import * as f from './backend/cloud-functions/index';
-import {siteBucketName, siteBucketWebsiteEndpoint} from './client/pulumi/index';
+import {siteBucket, siteBucketName, siteBucketWebsiteEndpoint} from './client/pulumi/index';
 import * as setup from './backend/resources/index';
 
 import * as pulumi from "@pulumi/pulumi";
@@ -21,6 +21,8 @@ const envJs = new gcp.storage.BucketObject("env.js", {
     name: "env.js",
     bucket: siteBucketName,
     content: pulumi.all([f.SignedPostEndpoint, f.createBofEndpoint, f.listBofEndpoint, setup.sourceBucketName]).apply(buildEnvJsFile)
+},{
+    parent: siteBucket
 });
 
 export const websiteUrl = siteBucketWebsiteEndpoint;

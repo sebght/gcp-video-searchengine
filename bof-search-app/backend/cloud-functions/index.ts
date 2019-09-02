@@ -10,14 +10,16 @@ const config = {
   functionsBucketName: stackConfig.require("functionsBucketName")
 };
 
-const functionhwName = "helloGet";
 const functionsuName = "getSignedURL";
 const functionnbName = "createBof";
 const functionfuName = "reportsFileUploads";
 const functioncaName = "convertAudioBof";
+const functionvttName = "slidesToText";
+const functionclnName = "slideAnalysisCleaning";
 const functionsttName = "speechToText";
-const functionekwName = "getKeyWords";
-const functiongbName = "getAllBofs"
+const functionekwName = "getKeyWordsAudio";
+const functionekwsName = "getKeyWordsSlides";
+const functiongbName = "getAllBofs";
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
 const source_bucket = config.sourceBucketName;
@@ -29,30 +31,13 @@ const bucket = new gcp.storage.Bucket(`${bucketName}_bofsearch`,{
   location: regionName
 });
 
-// Hello World
-
-const bucketObjecthw = new gcp.storage.BucketObject("hw-zip", {
-  bucket: bucket.name,
-  source: new pulumi.asset.AssetArchive({
-      ".": new pulumi.asset.FileArchive("./backend/cloud-functions/hw-func"),
-  }),
-});
-
-const functionhw = new gcp.cloudfunctions.Function(functionhwName, {
-  sourceArchiveBucket: bucket.name,
-  region: regionName,
-  runtime: "nodejs10",
-  sourceArchiveObject: bucketObjecthw.name,
-  entryPoint: "helloGet",
-  triggerHttp: true,
-  name: functionhwName
-});
-
 const bucketObjectUploadBof = new gcp.storage.BucketObject("ub-zip", {
   bucket: bucket.name,
   source: new pulumi.asset.AssetArchive({
       ".": new pulumi.asset.FileArchive("./backend/cloud-functions/upload-bof"),
   }),
+}, {
+  parent: bucket
 });
 
 // Fonction qui renvoie une Signed URL au client
@@ -68,6 +53,8 @@ const functionSignedURL = new gcp.cloudfunctions.Function(functionsuName, {
   environmentVariables: {
     bucket: source_bucket
   }
+}, {
+  parent: bucketObjectUploadBof
 });
 
 // Fonction qui initialise la création de la BoF dans la table Firestore
@@ -84,6 +71,8 @@ const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
     bucket_input: source_bucket,
     bucket_output: output_bucket
   }
+}, {
+  parent: bucketObjectUploadBof
 });
 
 // Fonction qui reporte l'ajout de fichiers à une BoF dans Firestore
@@ -99,13 +88,17 @@ const functionFileUploads = new gcp.cloudfunctions.Function(functionfuName, {
     resource: source_bucket
   },
   name: functionfuName
+}, {
+  parent: bucketObjectUploadBof
 });
 
-const bucketObjectContentAnalysis = new gcp.storage.BucketObject("ca-zip", {
+const bucketObjectAudioAnalysis = new gcp.storage.BucketObject("aa-zip", {
   bucket: bucket.name,
   source: new pulumi.asset.AssetArchive({
-    ".": new pulumi.asset.FileArchive("./backend/cloud-functions/content-analysis"),
+    ".": new pulumi.asset.FileArchive("./backend/cloud-functions/audio-analysis"),
   }),
+}, {
+  parent: bucket
 });
 
 // Fonction qui convertit l'audio fourni afin d'être ok pour l'analyse
@@ -115,7 +108,7 @@ const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
   region: regionName,
   availableMemoryMb: 1024,
   runtime: "nodejs8",
-  sourceArchiveObject: bucketObjectContentAnalysis.name,
+  sourceArchiveObject: bucketObjectAudioAnalysis.name,
   entryPoint: "convertAudioBof",
   eventTrigger: {
     eventType: "google.storage.object.finalize",
@@ -125,6 +118,8 @@ const functionConvertAudio = new gcp.cloudfunctions.Function(functioncaName, {
     bucket_output: source_converted_bucket
   },
   name: functioncaName
+}, {
+  parent: bucketObjectAudioAnalysis
 });
 
 // Fonction qui fait l'analyse Speech-To-Text sur l'audio converti
@@ -133,7 +128,7 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
   runtime: "nodejs8",
-  sourceArchiveObject: bucketObjectContentAnalysis.name,
+  sourceArchiveObject: bucketObjectAudioAnalysis.name,
   entryPoint: "speechToText",
   eventTrigger: {
     eventType: "google.storage.object.finalize",
@@ -144,21 +139,89 @@ const functionSpeechText = new gcp.cloudfunctions.Function(functionsttName, {
     bucket_output: output_bucket
   },
   name: functionsttName
+}, {
+  parent: bucketObjectAudioAnalysis
 });
 
-// Fonction qui extraie du transcript des tags
+// Fonction qui extraie du transcript de l'audio des tags
 
-const functionExtractKeys = new gcp.cloudfunctions.Function(functionekwName, {
+const functionExtractKeysAudio = new gcp.cloudfunctions.Function(functionekwName, {
   sourceArchiveBucket: bucket.name,
   region: regionName,
   runtime: "nodejs8",
-  sourceArchiveObject: bucketObjectContentAnalysis.name,
-  entryPoint: "getKeywords",
+  sourceArchiveObject: bucketObjectAudioAnalysis.name,
+  entryPoint: "getKeywordsAudio",
   eventTrigger: {
     eventType: "google.storage.object.finalize",
     resource: output_bucket
   },
   name: functionekwName
+}, {
+  parent: bucketObjectAudioAnalysis
+});
+
+const bucketObjectSlideAnalysis = new gcp.storage.BucketObject("sa-zip", {
+  bucket: bucket.name,
+  source: new pulumi.asset.AssetArchive({
+    ".": new pulumi.asset.FileArchive("./backend/cloud-functions/slide-analysis"),
+  }),
+}, {
+  parent: bucket
+});
+
+// Fonction qui fait l'analyse Vision-To-Text sur le pdf des slides
+
+const functionVisionText = new gcp.cloudfunctions.Function(functionvttName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectSlideAnalysis.name,
+  entryPoint: "slidesToText",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: source_bucket
+  },
+  timeout: 300,
+  environmentVariables: {
+    bucket_output: output_bucket
+  },
+  name: functionvttName
+}, {
+  parent: bucketObjectSlideAnalysis
+});
+
+// Fonction qui cleane l'analyse Vision-To-Text sur le pdf des slides
+
+const functionCleanSlidesToText = new gcp.cloudfunctions.Function(functionclnName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectSlideAnalysis.name,
+  entryPoint: "slideAnalysisCleaning",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: output_bucket
+  },
+  name: functionclnName
+}, {
+  parent: bucketObjectSlideAnalysis
+});
+
+// Fonction qui extraie du transcript de l'audio des tags
+
+const functionExtractKeysSlides = new gcp.cloudfunctions.Function(functionekwsName, {
+  sourceArchiveBucket: bucket.name,
+  region: regionName,
+  runtime: "nodejs8",
+  sourceArchiveObject: bucketObjectSlideAnalysis.name,
+  entryPoint: "getKeywordsSlides",
+  eventTrigger: {
+    eventType: "google.storage.object.finalize",
+    resource: output_bucket
+  },
+  name: functionekwsName
+}, {
+  parent: bucketObjectSlideAnalysis
 });
 
 const bucketObjectListItemsBof = new gcp.storage.BucketObject("li-zip", {
@@ -166,6 +229,8 @@ const bucketObjectListItemsBof = new gcp.storage.BucketObject("li-zip", {
   source: new pulumi.asset.AssetArchive({
     ".": new pulumi.asset.FileArchive("./backend/cloud-functions/list-items"),
   }),
+}, {
+  parent: bucket
 });
 
 const functionGetBofs = new gcp.cloudfunctions.Function(functiongbName, {
@@ -176,9 +241,10 @@ const functionGetBofs = new gcp.cloudfunctions.Function(functiongbName, {
   entryPoint: "getAllBofs",
   triggerHttp: true,
   name: functiongbName
+}, {
+  parent: bucketObjectListItemsBof
 });
 
-export let helloGetEndpoint = functionhw.httpsTriggerUrl;
 export let SignedPostEndpoint = functionSignedURL.httpsTriggerUrl;
 export let createBofEndpoint = functionCreateBof.httpsTriggerUrl;
 export let listBofEndpoint = functionGetBofs.httpsTriggerUrl;
