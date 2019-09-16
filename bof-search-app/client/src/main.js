@@ -5,10 +5,12 @@ import store from "./store";
 import vuetify from "./plugins/vuetify";
 import VuePlyr from "vue-plyr";
 import "vue-plyr/dist/vue-plyr.css";
+import InstantSearch from "vue-instantsearch";
 
 Vue.config.productionTip = false;
 
 Vue.use(VuePlyr);
+Vue.use(InstantSearch);
 
 new Vue({
   router,
