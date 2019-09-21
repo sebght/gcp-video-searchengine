@@ -1,94 +1,59 @@
 <template>
   <v-app>
-    <ais-instant-search
-      index-name="demo_ecommerce"
-      :search-client="searchClient"
-    >
+    <ais-instant-search index-name="bofs-index" :search-client="searchClient">
       <div class="left-panel">
         <ais-clear-refinements />
-        <h2>Brands</h2>
-        <ais-refinement-list attribute="brand" searchable />
+        <h2>Tags</h2>
+        <ais-refinement-list attribute="slides_tags.name" searchable />
         <ais-configure :hitsPerPage="8" />
       </div>
-      <div class="right-panel">
-        <ais-search-box />
-        <v-list class="ma-4" three-line>
-          <template v-for="(video, index) in videos">
-            <v-list-item :key="video.name" @click="storeVideo(video)">
-              <v-list-item-avatar>
-                <v-img
-                  v-if="video.speaker[0].photo === ''"
-                  :src="require('../assets/Avatar_Mario.png')"
-                ></v-img>
-                <v-img v-else :src="video.speaker[0].photo"></v-img>
-              </v-list-item-avatar>
+      <v-container>
+        <v-row justify="center">
+          <v-col cols="12">
+            <ais-search-box />
+            <ais-hits>
+              <v-list class="my-4" three-line slot-scope="{ items }">
+                <template v-for="(video, index) in items" v-if="video.name">
+                  <v-list-item :key="video.name" @click="storeVideo(video)">
+                    <v-list-item-avatar>
+                      <v-img
+                        v-if="video.speaker_photo === ''"
+                        :src="require('../assets/Avatar_Mario.png')"
+                      ></v-img>
+                      <v-img v-else :src="video.speaker_photo"></v-img>
+                    </v-list-item-avatar>
 
-              <v-list-item-content>
-                <v-list-item-title v-html="video.name"></v-list-item-title>
-                <v-list-item-subtitle
-                  v-html="video.speaker[0].name"
-                ></v-list-item-subtitle>
-              </v-list-item-content>
-              <v-spacer></v-spacer>
-              <v-img
-                v-if="video.thumbnailUrl === ''"
-                :src="require('../assets/Picto_Cinema.png')"
-                max-width="100"
-                max-height="70"
-              ></v-img>
-              <v-img
-                v-else
-                :src="video.thumbnailUrl"
-                max-width="100"
-                max-height="70"
-              ></v-img>
-            </v-list-item>
-            <v-divider :key="index" inset></v-divider>
-          </template>
-        </v-list>
-        <ais-pagination />
-      </div>
+                    <v-list-item-content>
+                      <v-list-item-title
+                        v-html="video.name"
+                      ></v-list-item-title>
+                      <v-list-item-subtitle
+                        v-html="video.speaker_name"
+                      ></v-list-item-subtitle>
+                    </v-list-item-content>
+                    <v-spacer></v-spacer>
+                    <v-img
+                      v-if="video.thumbnailUrl === ''"
+                      :src="require('../assets/Picto_Cinema.png')"
+                      max-width="100"
+                      max-height="70"
+                    ></v-img>
+                    <v-img
+                      v-else
+                      :src="video.thumbnailUrl"
+                      max-width="100"
+                      max-height="70"
+                    ></v-img>
+                  </v-list-item>
+                  <v-divider :key="index" inset></v-divider>
+                </template>
+              </v-list>
+            </ais-hits>
+            <ais-pagination />
+          </v-col>
+        </v-row>
+      </v-container>
     </ais-instant-search>
-    <v-container>
-      <v-row justify="center">
-        <v-col cols="10">
-          <v-list three-line>
-            <template v-for="(video, index) in videos">
-              <v-list-item :key="video.name" @click="storeVideo(video)">
-                <v-list-item-avatar>
-                  <v-img
-                    v-if="video.speaker[0].photo === ''"
-                    :src="require('../assets/Avatar_Mario.png')"
-                  ></v-img>
-                  <v-img v-else :src="video.speaker[0].photo"></v-img>
-                </v-list-item-avatar>
-
-                <v-list-item-content>
-                  <v-list-item-title v-html="video.name"></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-html="video.speaker[0].name"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>
-                <v-spacer></v-spacer>
-                <v-img
-                  v-if="video.thumbnailUrl === ''"
-                  :src="require('../assets/Picto_Cinema.png')"
-                  max-width="100"
-                  max-height="70"
-                ></v-img>
-                <v-img
-                  v-else
-                  :src="video.thumbnailUrl"
-                  max-width="100"
-                  max-height="70"
-                ></v-img>
-              </v-list-item>
-              <v-divider :key="index" inset></v-divider>
-            </template>
-          </v-list>
-        </v-col>
-      </v-row>
-    </v-container>
   </v-app>
 </template>
 
@@ -105,8 +70,8 @@ export default {
   data: () => ({
     videos: [],
     searchClient: algoliasearch(
-      "B1G2GM9NG0",
-      "aadef574be1f9252bb48d4ea09b5cfe5"
+      "EJ5FL908DI",
+      "ac4f4185aabaa94b05ba84e842f6811c"
     )
   }),
   methods: {
