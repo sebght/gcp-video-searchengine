@@ -171,6 +171,17 @@ exports.getKeywordsSlides = async (data,context) => {
         slides_tags: myFilteredData
     });
 
+    const client = algoliasearch(process.env.algoliaID, process.env.algoliaAPIkey);
+    const indexName = 'bofs-index';
+    const index = client.initIndex(indexName);
+
+    index.partialUpdateObject({
+        slides_tags: myFilteredData,
+        id: bofID
+    }, (err, content) => {
+        if (err) throw err;
+    });
+
     const filename = `${bofID}/indexes_from_slides.txt`;
     console.log(`Saving all non-filtered tags in gs://${file.bucket}/${filename}`);
     return output_bucket

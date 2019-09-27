@@ -7,7 +7,9 @@ const config = {
   sourceConvBucketName : stackConfig.require("sourceConvBucketName"),
   outputBucketName: stackConfig.require("outputBucketName"),
   region: stackConfig.require("region"),
-  functionsBucketName: stackConfig.require("functionsBucketName")
+  functionsBucketName: stackConfig.require("functionsBucketName"),
+  algoliaID: stackConfig.require("algoliaID"),
+  algoliaAPIkey: stackConfig.require("algoliaAPIkey")
 };
 
 const functionsuName = "getSignedURL";
@@ -20,6 +22,7 @@ const functionsttName = "speechToText";
 const functionekwName = "getKeyWordsAudio";
 const functionekwsName = "getKeyWordsSlides";
 const functiongbName = "getAllBofs";
+const functionraName = "reportsToAlgolia";
 const bucketName = config.functionsBucketName;
 const regionName = config.region;
 const source_bucket = config.sourceBucketName;
@@ -69,7 +72,9 @@ const functionCreateBof = new gcp.cloudfunctions.Function(functionnbName, {
   name: functionnbName,
   environmentVariables: {
     bucket_input: source_bucket,
-    bucket_output: output_bucket
+    bucket_output: output_bucket,
+    algoliaID: config.algoliaID,
+    algoliaAPIkey: config.algoliaAPIkey
   }
 }, {
   parent: bucketObjectUploadBof
@@ -155,6 +160,10 @@ const functionExtractKeysAudio = new gcp.cloudfunctions.Function(functionekwName
     eventType: "google.storage.object.finalize",
     resource: output_bucket
   },
+  environmentVariables: {
+    algoliaID: config.algoliaID,
+    algoliaAPIkey: config.algoliaAPIkey
+  },
   name: functionekwName
 }, {
   parent: bucketObjectAudioAnalysis
@@ -219,6 +228,10 @@ const functionExtractKeysSlides = new gcp.cloudfunctions.Function(functionekwsNa
     eventType: "google.storage.object.finalize",
     resource: output_bucket
   },
+  environmentVariables: {
+    algoliaID: config.algoliaID,
+    algoliaAPIkey: config.algoliaAPIkey
+  },
   name: functionekwsName
 }, {
   parent: bucketObjectSlideAnalysis
@@ -244,6 +257,25 @@ const functionGetBofs = new gcp.cloudfunctions.Function(functiongbName, {
 }, {
   parent: bucketObjectListItemsBof
 });
+
+// const functionRefreshAlgolia = new gcp.cloudfunctions.Function(functionraName, {
+//   sourceArchiveBucket: bucket.name,
+//   region: regionName,
+//   runtime: "nodejs8",
+//   sourceArchiveObject: bucketObjectListItemsBof.name,
+//   entryPoint: "reportsToAlgolia",
+//   eventTrigger: {
+//     eventType: "providers/cloud.firestore/eventTypes/document.write",
+//     resource: "bofs/{bofId}"
+//   },
+//   environmentVariables: {
+//     algoliaID: config.algoliaID,
+//     algoliaAPIkey: config.algoliaAPIkey
+//   },
+//   name: functionraName
+// }, {
+//   parent: bucketObjectListItemsBof
+// });
 
 export let SignedPostEndpoint = functionSignedURL.httpsTriggerUrl;
 export let createBofEndpoint = functionCreateBof.httpsTriggerUrl;

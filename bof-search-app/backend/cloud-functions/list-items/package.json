@@ -9,6 +9,7 @@
   "author": "SEGA",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/firestore": "^2.2.7"
+    "@google-cloud/firestore": "2.2.7",
+    "algoliasearch": "3.34.0"
   }
 }

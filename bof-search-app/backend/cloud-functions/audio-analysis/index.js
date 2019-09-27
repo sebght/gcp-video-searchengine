@@ -217,6 +217,17 @@ exports.getKeywordsAudio = async (data,context) => {
         audio_tags: myFilteredData
     });
 
+    const client = algoliasearch(process.env.algoliaID, process.env.algoliaAPIkey);
+    const indexName = 'bofs-index';
+    const index = client.initIndex(indexName);
+
+    index.partialUpdateObject({
+        audio_tags: myFilteredData,
+        id: bofID
+    }, (err, content) => {
+        if (err) throw err;
+    });
+
     const output_bucket = storage.bucket(file.bucket);
     const filename = `${bofID}/indexes.txt`;
     console.log(`Saving all non-filtered tags in gs://${file.bucket}/${filename}`);

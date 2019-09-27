@@ -8,3 +8,5 @@ config:
   static-website:pathToWebsiteContents: ./client/dist
   static-website:bucketName: pulumi.octo-bof-se.ga
   static-website:region: us-central1
+  resources:algoliaID: EJ5FL908DI
+  resources:algoliaAPIkey: 1233dd8229bbfa0f213e694a40d094b4

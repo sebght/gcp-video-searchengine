@@ -21,7 +21,6 @@ for(const bofKey in content) {
         videoUrl: content[bofKey].videoUrl,
         audio_tags: content[bofKey].audio_tags,
         slides_tags: content[bofKey].slides_tags,
-        post_date: content[bofKey].post_date,
         post_date_timestamp: content[bofKey].post_date_timestamp
     });
     const record = {
@@ -34,7 +33,6 @@ for(const bofKey in content) {
         videoUrl: content[bofKey].videoUrl,
         audio_tags: content[bofKey].audio_tags,
         slides_tags: content[bofKey].slides_tags,
-        post_date: content[bofKey].post_date,
         post_date_timestamp: content[bofKey].post_date_timestamp
     };
     algoliaRecords.push(record);

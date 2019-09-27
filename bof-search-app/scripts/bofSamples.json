@@ -12,7 +12,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/758/big/_INE0314.jpg?1506723434"
       }
     ],
-    "post_date": "2019-07-18T17:30:00+00:00",
     "post_date_timestamp": 1563471000,
     "audio_tags": [],
     "slides_tags": [],
@@ -28,7 +27,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
       }
     ],
-    "post_date": "2019-06-20T18:38:00+00:00",
     "post_date_timestamp": 1561055880,
     "audio_tags": [],
     "slides_tags": [],
@@ -48,7 +46,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/922/big/CINE7409.jpg?1521639427"
       }
     ],
-    "post_date": "2019-05-16T18:09:00+00:00",
     "post_date_timestamp": 1558030140,
     "audio_tags": [],
     "slides_tags": [],
@@ -72,7 +69,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/607/big/CINE3086.jpg?1484571772"
       }
     ],
-    "post_date": "2019-05-16T16:37:00+00:00",
     "post_date_timestamp": 1558024620,
     "audio_tags": [],
     "slides_tags": [],
@@ -88,7 +84,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/190/big/OCTO_5_Accessoire_RVB.jpg?1530696131"
       }
     ],
-    "post_date": "2019-05-16T15:14:00+00:00",
     "post_date_timestamp": 1558019640,
     "audio_tags": [],
     "slides_tags": [],
@@ -108,7 +103,6 @@
         "photo": "https://s3.amazonaws.com/askbob/users/photos/1264/big/CINE4973.jpg?1529393385"
       }
     ],
-    "post_date": "2019-03-21T14:40:00+00:00",
     "post_date_timestamp": 1553179200,
     "audio_tags": [
       { "name": "projet" }, { "name": "coup" }, { "name": "fois" }, { "name": "guide" }, { "name": "clients" }, { "name": "entretien" }, { "name": "diffusion" },

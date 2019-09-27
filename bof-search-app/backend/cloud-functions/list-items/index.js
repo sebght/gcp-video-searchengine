@@ -1,5 +1,6 @@
 const Firestore = require('@google-cloud/firestore');
 const db = new Firestore();
+const algoliasearch = require('algoliasearch');
 
 /**
  * HTTP function that returns the list of all Bofs uploaded
@@ -30,5 +31,45 @@ exports.getAllBofs = async (req, res) => {
         videos.push(doc.data());
     });
     res.send(videos)
+};
+
+/**
+ * Firestore function that reports the Firestore changes into Algolia
+ *
+ * @param {object} data The event payload.
+ * @param {object} context The event metadata.
+ */
+exports.reportsToAlgolia = async (data, context) => {
+    const client = algoliasearch(process.env.algoliaID, process.env.algoliaAPIkey);
+    const indexName = 'bofs-index';
+    const index = client.initIndex(indexName);
+
+    console.log(`Function triggered by change to: ${context.resource}`);
+    console.log(`Event type: ${context.eventType}`);
+
+    let bofsRef = db.collection('bofs');
+    let algoliaRecords = [];
+    let allBofs = await bofsRef.get();
+    allBofs.forEach(doc => {
+        const record = {
+            id: doc.id,
+            name: doc.name,
+            description: doc.description,
+            thumbnailUrl: doc.thumbnailUrl,
+            speaker_name: doc.speaker[0].name,
+            speaker_photo: doc.speaker[0].photo,
+            videoUrl: doc.videoUrl,
+            audio_tags: doc.audio_tags,
+            slides_tags: doc.slides_tags,
+            post_date_timestamp: doc.post_date_timestamp
+        };
+        algoliaRecords.push(record);
+    });
+
+    index.clearIndex();
+
+    index.addObjects(algoliaRecords, (err, content) => {
+        console.log("Index changed");
+    });
 };
 

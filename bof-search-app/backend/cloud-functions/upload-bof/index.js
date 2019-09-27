@@ -59,7 +59,7 @@ exports.getSignedUrl = (req, res) => {
 };
 
 /**
- * HTTP function that reports a new upload to Firestore
+ * HTTP function that reports a new upload to Firestore and Algolia
  *
  * @param {Object} req Cloud Function request context.
  * @param {Object} res Cloud Function response context.
@@ -74,7 +74,7 @@ exports.createNewBof = async (req, res) => {
     console.log(`Responding to a pre-flight OPTIONS request`);
     // Send response to OPTIONS requests
     res.set("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS");
-    res.set("Access-Control-Allow-Headers", "Content-Type");
+    res.set("Access-Control-Allow-Headers", "Content-Type,Authorization");
     res.set("Access-Control-Max-Age", "3600");
     return res.status(204).send("");
   } else if (req.method !== "POST") {
@@ -92,8 +92,31 @@ exports.createNewBof = async (req, res) => {
     speaker: req.body.speaker,
     files: [],
     audio_tags: [],
-    slides_tags: []
+    slides_tags: [],
+    videoUrl: '',
+    thumbnailUrl: '',
+    post_date_timestamp: Date.now()
   });
+
+  const client = algoliasearch(process.env.algoliaID, process.env.algoliaAPIkey);
+  const indexName = 'bofs-index';
+  const index = client.initIndex(indexName);
+
+  index.addObject({
+    id: docRef.id,
+    name: req.body.title,
+    description: req.body.descr,
+    speaker_name: req.body.speaker[0].name,
+    speaker_photo: req.body.speaker[0].photo,
+    audio_tags: [],
+    slides_tags: [],
+    videoUrl: '',
+    thumbnailUrl: '',
+    post_date_timestamp: Date.now()
+  }, (err, { id } = {}) => {
+    console.log(`Added Bof to Algolia, with ID: ${id}`);
+  });
+
   const bucket_input = storage.bucket(process.env.bucket_input);
   const bucket_output = storage.bucket(process.env.bucket_output);
   const pathFile = `${docRef.id}/init.json`;
